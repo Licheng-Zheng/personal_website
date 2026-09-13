@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compoxel Gravity Engine Deep Dive | Licheng Zheng</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            color-scheme: light;
+        }
+
+        ::selection {
+            background-color: black;
+            color: white;
+        }
+
+        .article-body p {
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+        }
+
+        .article-body ul {
+            list-style-type: square;
+            margin-left: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .article-body li {
+            margin-bottom: 0.5rem;
+        }
+
+        pre, pre[class*="language-"] { 
+            border-left: 6px solid #fdba74 !important; 
+            box-shadow: none !important; 
+            white-space: pre-wrap !important; 
+            word-break: break-word !important; 
+        }
+        pre::before, pre::after, pre[class*="language-"]::before, pre[class*="language-"]::after { display: none !important; }
+        code, code[class*="language-"] { 
+            border: none !important;
+            box-shadow: none !important;
+            white-space: pre-wrap !important; 
+            word-break: break-word !important; 
+        }
+    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-coy.min.css" rel="stylesheet" />
+    <link rel="icon" type="image/png" href="../assets/favicon.png">
+
+    <!-- KaTeX Import for Math Equations -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" crossorigin="anonymous">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
+        crossorigin="anonymous"
+        onload="renderMathInElement(document.body, {delimiters:[{left: '$$', right: '$$', display: true},{left: '$', right: '$', display: false}]});"></script>
+</head>
+
+<body class="bg-white text-black font-sans antialiased min-h-screen flex flex-col">
+    <!-- Scroll Progress Bar -->
+    <div id="scroll-progress" class="fixed top-0 left-0 h-2 bg-black shadow-md z-[100] transition-all duration-75"
+        style="width: 0%;"></div>
+    <script>
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = height > 0 ? (winScroll / height) * 100 : 0;
+            document.getElementById('scroll-progress').style.width = scrolled + '%';
+        });
+    </script>
+
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-white border-b border-black w-full px-6 py-4">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <a href="../index.html" class="font-serif font-bold text-xl tracking-tight hover:underline block">L.
+                Zheng</a>
+            <div class="flex flex-wrap justify-center gap-6">
+                <a href="../index.html"
+                    class="font-mono text-sm text-black hover:underline hover:font-bold transition-all">Home</a>
+                <a href="../projects.html"
+                    class="font-mono text-sm text-black hover:underline hover:font-bold transition-all">Projects</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl mx-auto w-full px-6 py-12 md:py-16">
+
+        <div class="mb-12 font-mono text-xs text-slate-500 border-b border-black pb-4">
+            <a href="../projects.html" class="hover:text-black hover:underline">&larr; Projects</a> / Compoxel N-Body
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-12 lg:gap-20 items-start">
+
+            <aside class="hidden lg:block lg:w-64 flex-shrink-0 sticky top-28">
+                <span class="font-mono text-xs font-bold border-b-2 border-black pb-2 mb-4 block w-full">Contents</span>
+                <nav class="flex flex-col space-y-3 font-sans text-sm border-l border-slate-300 pl-4">
+                    <a href="#abstract" class="text-slate-500 hover:text-black transition-colors">0. Abstract &
+                        Metadata</a>
+                    <a href="#methods" class="text-slate-500 hover:text-black transition-colors">1. Algorithm
+                        Architecture</a>
+                    <a href="#benchmarking" class="text-slate-500 hover:text-black transition-colors">2. Performance
+                        Metrics</a>
+                    <a href="#constraints" class="text-slate-500 hover:text-black transition-colors">3. Validation and
+                        Bottlenecks</a>
+                    <a href="#infrastructure" class="text-slate-500 hover:text-black transition-colors">4. Project
+                        Setup</a>
+                </nav>
+
+                <!-- Interactive Graph -->
+                <div
+                    class="mt-12 w-full h-[250px] border border-black bg-slate-50 flex flex-col shadow-sm relative overflow-hidden">
+                    <div class="border-b border-black p-2 bg-white">
+                        <h3 class="font-mono text-[8px] font-bold text-center">Interactive
+                            Graph</h3>
+                    </div>
+                    <div id="graph-container" class="flex-grow relative w-full h-full"></div>
+                </div>
+                <!-- Tooltip for Graph -->
+                <div id="tooltip"
+                    style="position: fixed; opacity: 0; background-color: white; border: 1px solid black; padding: 4px 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; pointer-events: none; z-index: 100;">
+                </div>
+
+            </aside>
+
+            <article class="flex-grow max-w-3xl article-body">
+
+                <header class="mb-12" id="abstract">
+                    <h1 class="font-serif text-5xl md:text-6xl font-bold tracking-tight leading-tight mb-6">
+                        Compoxel N-Body Gravity Engine
+                    </h1>
+
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 border-y border-black py-4 mb-8">
+                        <div id="telemetry-container" data-project-slug="compoxel">
+                            <span class="font-mono text-[10px] text-slate-500 block mb-1">Status</span>
+                            <div id="telemetry-content"><span class="font-mono text-sm text-slate-400">Loading
+                                    telemetry...</span></div>
+                        </div>
+                        <div>
+                            <span class="font-mono text-[10px] text-slate-500 block mb-1">Tech Stack</span>
+                            <span class="font-mono text-sm">CUDA, C++, PyFlameGPU, Modal, Blender</span>
+                        </div>
+                        <div class="col-span-2 md:col-span-1">
+                            <span class="font-mono text-[10px] text-slate-500 block mb-1">Repository</span>
+                            <a href="https://github.com/Licheng-Zheng" target="_blank"
+                                class="font-mono text-sm text-blue-600 hover:underline">View on GitHub &nearr;</a>
+                        </div>
+                    </div>
+
+                    <p class="font-sans text-xl leading-relaxed text-slate-800 font-bold">
+                        Compoxel is a massively parallel N-body gravity engine build in C++ and CUDA. It runs very close
+                        to memory to reduce overhead introduced by some external libraries. Through this project, I have
+                        also been able to experiment with different algorithms. By implementing a Hybrid Tree Particle
+                        Mesh algorithm with dynamic density routing, cache thrashing is significantly reduced with large
+                        time speed ups when compared to the naive baseline, allowing for over 10 million entities
+                        entirely in the VRAM.
+                    </p>
+                </header>
+
+                <!-- YouTube 10 Million Entity Render (Custom Facade) -->
+                <div class="youtube-facade relative aspect-video w-full mb-10 border border-black bg-black cursor-pointer group"
+                    data-video-id="eKMynsMQN3g">
+                    <img src="https://img.youtube.com/vi/eKMynsMQN3g/maxresdefault.jpg" alt="Video Thumbnail"
+                        class="absolute inset-0 w-full h-full object-cover filter grayscale opacity-70 group-hover:opacity-100 transition-opacity duration-300">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div
+                            class="border-2 border-white bg-black text-white font-mono text-xs px-6 py-3 group-hover:bg-white group-hover:text-black transition-colors duration-200 shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] group-hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] group-hover:-translate-x-1 group-hover:-translate-y-1">
+                            Play Render
+                        </div>
+                    </div>
+                </div>
+
+                <h2 id="methods"
+                    class="font-serif text-3xl font-bold border-b border-black pb-2 scroll-mt-24 mt-12 mb-6">1.
+                    Algorithmic Architecture and Methods</h2>
+
+                <p>Gravitational influence for N-bodies is an $O(N^2)$ computation per time step. To bypass this
+                    computational bottleneck, I implemented two distinct optimization algorithms—Hierarchical Tree and
+                    Particle-Mesh—and integrated them into a dynamic Hybrid TreePM architecture.</p>
+
+                <div class="my-8 border-l-4 border-black bg-slate-50 p-6 relative">
+                    <span
+                        class="absolute top-0 left-0 bg-black text-white font-mono text-[10px] px-2 py-1 transform -translate-y-1/2 ml-4">Important
+                        Definitions</span>
+                    <ul class="list-disc pl-5 mt-2 space-y-2 text-sm font-serif">
+                        <li><strong>Voxel:</strong> Subdivisions of the physical simulation space used to cluster nearby
+                            stars together. Essentially what a pixel is to 2 dimensions as a voxel is to 3 dimensions
+                        </li>
+                        <li><strong>MAC (Multipole Acceptance Criterion):</strong> A parameter that is set by the user
+                            to determine if the algorithm can use the computationally cheaper tree method without losing
+                            too much accuracy. It is a measure of the ratio of the size to distance. ($\large
+                            \frac{s}{d} < \theta$ if this is smaller than the theta that has been set by the user, then
+                                the calculation can be simplified)</li>
+                        <li><strong>Warp Divergence:</strong> This occurs when a single warp has multiple threads
+                            branching out, resulting in these calculations needing to be computed sequentially rather
+                            than parallely, which is what GPUs are meant to do.
+                        </li>
+                        <li><strong>Cache Thrashing</strong> Caused when memory being accessed is not contiguous in
+                            memory. This forces the GPU to "search" around for the information that it needs. This shows
+                            up more in algorithms that structure the data (the tree algorithm in this case)
+                        </li>
+                    </ul>
+                </div>
+
+                <p>See "2. Performance Metrics" for the empirical time complexity calculations.</p>
+                <h3 class="font-bold text-lg mt-6 mb-2">Method 1: The Naive Baseline $O(N^2)$</h3>
+                <p>This is the ground-truth brute-force calculation where every entity calculates its attraction to
+                    every other object. Gravitational softening is injected into the denominator of the
+                    force calculation ($F = G\frac{m_1 m_2}{r^2+\epsilon^2}$) to mathematically cap maximum force and
+                    prevent slingshotting to infinity as distance $r$ approaches zero. (if the stars got basically on
+                    top of each other, without this term, the acceleration would go to infinity. Because we are using
+                    discrete time steps, by the time the next calculation occurs, the star will have already been flung
+                    far far away)</p>
+
+                <h3 class="font-bold text-lg mt-6 mb-2">Method 2: Hierarchical Center of Mass Voxels (Tree) $O(N \log
+                    N)$</h3>
+                <p>Adapted from the Barnes-Hut algorithm for sparse environments. The bounding box is hierarchically
+                    subdivided into voxels (L1 to L3). For distant voxels passing the Multipole Acceptance Criterion
+                    (MAC), the algorithm computes gravitational attraction against the voxel's center of mass rather
+                    than individual stars, reducing the compute load.
+                    For example, in the 10 million star simulation, the naive method would have computed the attraction
+                    for every single star, resulting in one hundred trillion (10 million squared) calculations per time
+                    step (there were 500 time steps in the 10 million star simulation). Instead of this, the tree voxels
+                    compresses far away stars into a single voxel. Even when just considering the L1 (smallest) voxel,
+                    of which there are 27 thousand, this massively cuts down on the required compute. Even more
+                    improvements are achieved with the larger voxels.
+                    <br> <br>
+
+                    An issue of using this method is something that I noticed after the 500 thousand simulation called
+                    "grid anisotropy". This is caused by the voxels exerting all of their force from single point,
+                    rather than the scattered stars pulling it in all directions. This results in the star cluster being
+                    "pulled" initially, resulting in a starfish like shape.
+                    My implementation of the tree suffers greatly from this because it uses a calculation called the
+                    "Nearest Grid Point" where the entire voxels mass is condensed into a single point.
+
+                    <br> <br>
+                    To reduce these effects, I am exploring these approaches:
+                <p>
+                <ul>
+                    <li>Decreasing the MAC threshold makes it harder to be met. This makes it so only voxels that are
+                        further away can pass it, while ones nearby fall back to the naive calculation. This will reduce
+                        the strength of the voxels (as they are far away and gravitational attraction decreases at
+                        distance squared), resulting in less pronounced points. This will increase the amount of
+                        computation required, but will reduce the effects of grid anisotropy</li>
+                    <li>Triangular Shaped Cloud (TSC), instead of condensing all the stars in a voxel, their masses are
+                        spread out into the corners of the voxel (kind of like the particle mesh method), this
+                        eliminates all of the force from the voxel coming from a single point. More routing logic will
+                        need to be created if I do this because if I do it naively, it could balloon to being
+                        computationally worse than the naive method.</li>
+                </ul>
+
+                <h3 class="font-bold text-lg mt-6 mb-2">Method 3: Force Field (Particle-Mesh) $O(N \log N)$</h3>
+                <p>For high-density regions, the GPU falls back to $O(N^2)$ loops in the Tree method. To mitigate this,
+                    a force field is generated using Cloud-In-Cell (CIC) scattering. Mass is proportionally spread to
+                    the corners of subdivided mesh cubes, creating a global potential field that maintains a constant
+                    computation cost regardless of particle density.</p>
+
+                <h3 class="font-bold text-lg mt-6 mb-2">Method 4: The Hybrid TreePM Engine</h3>
+                <p>This architecture seamlessly routes GPU warps based on a dynamic density heuristic
+                    (<code>IS_DENSE</code>). If an L1 voxel exceeds the threshold (e.g., 2,000 stars), warps are routed
+                    to the Particle-Mesh solver. Sparse regions continue utilizing the Tree method. This eliminates
+                    cache thrashing in galactic cores and completely prevents the GPU from falling back to brute-force
+                    pointer chasing.</p>
+
+                <!-- YouTube 500k Side-by-Side Render Comparison (Custom Facade) -->
+                <div class="youtube-facade relative aspect-video w-full mb-10 border border-black bg-black cursor-pointer group"
+                    data-video-id="04ab9BQedZc">
+                    <img src="https://img.youtube.com/vi/04ab9BQedZc/maxresdefault.jpg" alt="Video Thumbnail"
+                        class="absolute inset-0 w-full h-full object-cover filter grayscale opacity-70 group-hover:opacity-100 transition-opacity duration-300">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div
+                            class="border-2 border-white bg-black text-white font-mono text-xs px-6 py-3 group-hover:bg-white group-hover:text-black transition-colors duration-200 shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] group-hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] group-hover:-translate-x-1 group-hover:-translate-y-1">
+                            Play Comparison
+                        </div>
+                    </div>
+                </div>
+
+                <h2 id="benchmarking"
+                    class="font-serif text-3xl font-bold border-b border-black pb-2 scroll-mt-24 mt-12 mb-6">2.
+                    Performance Metrics</h2>
+
+                <p>All benchmarks were strictly standardized on NVIDIA T4 GPUs. To isolate computational time from I/O
+                    overhead, figures represent the average of 6 frames, taken only after 2 uncounted "warm-up" frames
+                    to ensure PCIe P-states reached P0 utilization and JIT compilation was complete.</p>
+
+                <h3 class="font-bold text-lg mt-6 mb-4">Simulation Parameters (10M Run)</h3>
+                <div class="overflow-x-auto my-8 border border-black">
+                    <table class="w-full text-left font-sans text-sm md:text-base border-collapse">
+                        <thead class="bg-slate-100 border-b border-black font-serif">
+                            <tr>
+                                <th class="p-3 border-r border-black">Parameter</th>
+                                <th class="p-3 border-r border-black">Value</th>
+                                <th class="p-3">Role</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-black">
+                                <td class="p-3 border-r border-black font-mono text-sm">Integration Timestep ($\Delta
+                                    t$)</td>
+                                <td class="p-3 border-r border-black">0.05</td>
+                                <td class="p-3">Fixed timestep size</td>
+                            </tr>
+                            <tr class="bg-slate-50 border-b border-black">
+                                <td class="p-3 border-r border-black font-mono text-sm">Softening Factor ($\epsilon^2$)
+                                </td>
+                                <td class="p-3 border-r border-black">0.1 / 0.001</td>
+                                <td class="p-3">Prevents division by zero in direct / P3M math</td>
+                            </tr>
+                            <tr class="border-b border-black">
+                                <td class="p-3 border-r border-black font-mono text-sm">L1 Tree Voxel</td>
+                                <td class="p-3 border-r border-black">Grid: 30x30x30</td>
+                                <td class="p-3">Base layer (27,000 total voxels)</td>
+                            </tr>
+                            <tr class="bg-slate-50 border-b border-black">
+                                <td class="p-3 border-r border-black font-mono text-sm">L2 Tree Voxel</td>
+                                <td class="p-3 border-r border-black">Grid: 6x6x6</td>
+                                <td class="p-3">Mid layer (216 total voxels)</td>
+                            </tr>
+                            <tr class="border-b border-black">
+                                <td class="p-3 border-r border-black font-mono text-sm">L3 Tree Voxel</td>
+                                <td class="p-3 border-r border-black">Grid: 2x2x2</td>
+                                <td class="p-3">Top layer (8 total voxels)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 class="font-bold text-lg mt-6 mb-4">Execution Time Latency</h3>
+                <table class="w-full text-sm text-left font-sans border-collapse mb-8">
+                    <thead>
+                        <tr>
+                            <th class="border border-black bg-slate-100 p-2 font-mono text-xs ">Particle Count
+                                (N)</th>
+                            <th class="border border-black bg-slate-100 p-2 font-mono text-xs ">Naive (ms)</th>
+                            <th class="border border-black bg-slate-100 p-2 font-mono text-xs ">Tree (ms)</th>
+                            <th class="border border-black bg-slate-100 p-2 font-mono text-xs ">Pure Mesh (ms)
+                            </th>
+                            <th class="border border-black bg-slate-100 p-2 font-mono text-xs ">Hybrid TreePM
+                                (ms)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="border border-slate-300 p-2">100,000</td>
+                            <td class="border border-slate-300 p-2">130.25</td>
+                            <td class="border border-slate-300 p-2">185.21</td>
+                            <td class="border border-slate-300 p-2">158.87</td>
+                            <td class="border border-slate-300 p-2">164.54</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-slate-300 p-2">500,000</td>
+                            <td class="border border-slate-300 p-2">3059.95</td>
+                            <td class="border border-slate-300 p-2">848.86</td>
+                            <td class="border border-slate-300 p-2">708.16</td>
+                            <td class="border border-slate-300 p-2">868.93</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-slate-300 p-2">1,000,000</td>
+                            <td class="border border-slate-300 p-2">11815.10</td>
+                            <td class="border border-slate-300 p-2">1783.50</td>
+                            <td class="border border-slate-300 p-2">1474.25</td>
+                            <td class="border border-slate-300 p-2">2264.61</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-slate-300 p-2">5,000,000</td>
+                            <td class="border border-slate-300 p-2">264285.20</td>
+                            <td class="border border-slate-300 p-2">27271.80</td>
+                            <td class="border border-slate-300 p-2">19512.37</td>
+                            <td class="border border-slate-300 p-2">50441.12</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-slate-300 p-2">10,000,000</td>
+                            <td class="border border-slate-300 p-2 font-bold">DNF (Timeout)</td>
+                            <td class="border border-slate-300 p-2">96985.15</td>
+                            <td class="border border-slate-300 p-2">63649.05</td>
+                            <td class="border border-slate-300 p-2">209969.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <img src="../assets/images/projects/compoxel/curve_fitting.webp" alt="Empirical Curve Fitting Graph"
+                    class="w-full border border-black mb-10 shadow-sm">
+
+                <h3 class="font-bold text-lg mt-6 mb-2">Empirical Big-O Curve Fitting</h3>
+                <p>Using Scipy, the benchmark data was empirically fitted to theoretically modeled equations. To ensure
+                    I wasn't forcing a particular time complexity upon the simulation, I curve fitted multiple equations
+                    ($O(N)$, $O(N^2)$, $O(\log N)$, $O(N \log N)$) and used the one with the highest $R^2$ value. The
+                    analysis yielded
+                    the following $R^2$ exact fits:</p>
+                <ul class="list-disc pl-5 mb-6">
+                    <li><strong>Naive $O(N^2)$:</strong> $T = 1.05\times 10^{-5}\cdot N^2 + 0.56$ ($R^2 = 1.0000$)</li>
+                    <li><strong>Tree $O(N \log N)$:</strong> $T = 7.25\times 10^{-4}\cdot N \log_2(N) - 4.94$ ($R^2 =
+                        0.9694$)</li>
+                    <li><strong>Mesh $O(N \log N)$:</strong> $T = 4.77\times 10^{-4}\cdot N \log_2(N) - 2.87$ ($R^2 =
+                        0.9773$)</li>
+                    <li><strong>Hybrid $O(N \log N)$:</strong> $T = 1.56\times 10^{-3}\cdot N \log_2(N) - 12.75$ ($R^2 =
+                        0.9545$)</li>
+                </ul>
+                <p>Something interesting seen from this graph and the fit curves are the exact $R^2$ values for each
+                    method.</p>
+                <ul>
+                    <li>There is no initial set up time for the naive method, and this perfectly fits the curve: the
+                        compute time scales flawlessly with the number of entities.</li>
+                    <li>The force field method requires some setup, so it deviates slightly from the curve if compute
+                        was the only consideration. The voxel method requires far more time to set up, because it has to
+                        break the space down multiple times, resulting in longer setup times. This appears in the graph
+                        as a larger deviation from the theoretical curve-which represents the ideal scenario if pure
+                        compute was the only factor.</li>
+                    <li>Finally, the hybrid method requires about as much setup as the force field and voxel methods
+                        combined. This results in a far larger deviation from the line of best fit (note that $R^2$ is
+                        not linear so the deviation does not scale linearly to time).</li>
+                </ul>
+                <p>Here is visual per-frame execution latency video comparison of all four methods with some
+                    explanations during the video.</p>
+
+                <!-- YouTube Latency Comparison (Custom Facade) -->
+                <div class="youtube-facade relative aspect-video w-full mb-10 border border-black bg-black cursor-pointer group"
+                    data-video-id="hd1ui1vHk0g">
+                    <img src="https://img.youtube.com/vi/hd1ui1vHk0g/maxresdefault.jpg" alt="Video Thumbnail"
+                        class="absolute inset-0 w-full h-full object-cover filter grayscale opacity-70 group-hover:opacity-100 transition-opacity duration-300">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div
+                            class="border-2 border-white bg-black text-white font-mono text-xs px-6 py-3 group-hover:bg-white group-hover:text-black transition-colors duration-200 shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] group-hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] group-hover:-translate-x-1 group-hover:-translate-y-1">
+                            Play Comparison
+                        </div>
+                    </div>
+                </div>
+
+                <h2 id="constraints"
+                    class="font-serif text-3xl font-bold border-b border-black pb-2 scroll-mt-24 mt-12 mb-6">3.
+                    Validation and Bottlenecks</h2>
+
+                <h3 class="font-bold text-lg mt-6 mb-4">Error Rate Analysis (Compared to Ground Truth Naive)</h3>
+                <table class="w-full text-sm text-left font-sans border-collapse mb-8">
+                    <thead>
+                        <tr>
+                            <th class="border border-black bg-slate-100 p-2 font-mono text-xs ">Algorithm (500K
+                                Entities)</th>
+                            <th class="border border-black bg-slate-100 p-2 font-mono text-xs ">Global MSE</th>
+                            <th class="border border-black bg-slate-100 p-2 font-mono text-xs ">P99 Error</th>
+                            <th class="border border-black bg-slate-100 p-2 font-mono text-xs ">Max Absolute
+                                Error</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="border border-slate-300 p-2">Tree</td>
+                            <td class="border border-slate-300 p-2">135.41</td>
+                            <td class="border border-slate-300 p-2">22.66</td>
+                            <td class="border border-slate-300 p-2">34.40</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-slate-300 p-2">Mesh</td>
+                            <td class="border border-slate-300 p-2">134.84</td>
+                            <td class="border border-slate-300 p-2">22.59</td>
+                            <td class="border border-slate-300 p-2">36.23</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-slate-300 p-2">Hybrid TreePM</td>
+                            <td class="border border-slate-300 p-2">134.96</td>
+                            <td class="border border-slate-300 p-2">22.60</td>
+                            <td class="border border-slate-300 p-2">34.95</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3 class="font-bold text-lg mt-6 mb-2">Stress Testing Hardware</h3>
+                <p>When testing the simulation at 5 million entities, both the Tree and Hybrid Tree PM methods did not
+                    compute a single frame before the 3600-second timeout. This was caused by the following issues:
+                <ul class="list-disc pl-5 mb-6">
+                    <li><strong>Cache Thrashing (Pure Tree):</strong> When the stars are very densely packed
+                        together,
+                        the MAC forces the simulation in the naive computation with $O(N^2)$ time complexity.
+                        However,
+                        the tree methods performs worse than the naive method because the tree had structured the
+                        stars
+                        in memory, resulting in something known as cache thrashing. This happens when the GPU is
+                        forced
+                        to "jump" around in memory to find the required memory location (rather than having them
+                        being
+                        in contiguous memory as is the case for the naive method). This results in even slower
+                        computation
+                        than in the naive method.
+                    </li>
+                    <li><strong> Incorrect Parameters (Hybrid): </strong>For the hybrid method, the simulation didn't
+                        work for
+                        similar reasons as the pure tree method. The dense threshold was set too high for it to fall
+                        back to the mesh method, while the MAC was set too strict for it to begin using the
+                        approximations. This resulted in it timing out in the same manner as the pure tree method.
+                        Ideally, for the tree PM method, the routing switch would be immediately after the mesh dense
+                        threshold was exceeded. However, they use different conditions to begin working, so there is no
+                        switch that can be implemented for this. For this reason, I am looking into implementing a
+                        dynamic switcher. </li>
+                </ul>
+
+                <h2 id="infrastructure"
+                    class="font-serif text-3xl font-bold border-b border-black pb-2 scroll-mt-24 mt-12 mb-6">4.
+                    Project Setup</h2>
+
+                <pre class="mermaid border border-black p-4 bg-slate-50 mb-10 shadow-sm max-h-[400px] overflow-auto">
+graph LR
+ B[Initial Conditions] --> C[Zero-Copy Pointer Mapping to FLAME GPU]
+ C --> D[Start Frame Loop]
+ D --> E[Star to Voxel Hashing]
+ E --> F[Aggregate Center of Mass]
+ F --> G[Check Voxel Density Threshold]
+ G -->|Sparse: Under Threshold| H[Tree Method: Flat MAC Check]
+ H --> I[Apply Individual Star Gravity]
+ G -->|Dense: Over Threshold| J[Particle-Mesh: Cloud-In-Cell Scatter]
+ J --> K[Solve Fluid Grid Potential]
+ K --> L[Gather Interpolated Forces]
+ I --> M[Update Kinematics]
+ L --> M
+ M --> N[Raw Binary Dump to NVMe Storage]
+ N --> O[Loop until Frames Complete]
+ O --> P[Tar Archive Creation]
+ P --> Q[Cloud-to-Cloud Transfer to Modal Volume]
+ Q --> R[Parallel Headless Blender Rendering]
+ R --> S[Completed Render]
+ </pre>
+
+                <h3 class="font-bold text-lg mt-6 mb-4">Rendering</h3>
+                <p class="mb-8 text-slate-700">The 10 million entity render was accomplished via a custom headless
+                    Blender Python script running in parallel across cloud instances using the Cycles renderer. Each
+                    frame's state was imported directly from the NVMe binary dumps into Blender's geometry nodes
+                    system. Only the star positions had to be imported because blender did not perform any of the
+                    simulations. The geometry and shader graphs seen below are what I used to render the stars.</p>
+
+                <img src="../assets/images/projects/compoxel/blender_nodes.webp"
+                    alt="Blender used for rendering everything" class="w-full border border-black mb-10 shadow-sm">
+
+
+                <h3 class="font-bold text-lg mt-6 mb-4">Serverless Compute Bill of Materials</h3>
+                <p>To reduce infrastructure costs for the 10 million entity collision, parallel compute workflows
+                    were
+                    distributed across Modal and RunPod. The total cost to generate and render the cinematic
+                    simulation
+                    was $20.18. A significantly more detailed breakdown can be found on the github repository in the
+                    bill of materials section. </p>
+
+                <table class="w-full text-sm text-left font-sans border-collapse mb-8">
+                    <thead>
+                        <tr>
+                            <th class="border border-black bg-slate-100 p-2 font-mono text-xs ">Component</th>
+                            <th class="border border-black bg-slate-100 p-2 font-mono text-xs ">Purpose</th>
+                            <th class="border border-black bg-slate-100 p-2 font-mono text-xs ">Cost Metric
+                            </th>
+                            <th class="border border-black bg-slate-100 p-2 font-mono text-xs ">Total Cost</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="border border-slate-300 p-2">Modal Rendering (500k)</td>
+                            <td class="border border-slate-300 p-2">Parallel headless Blender (10x NVIDIA T4)</td>
+                            <td class="border border-slate-300 p-2">$0.000164 / sec</td>
+                            <td class="border border-slate-300 p-2">$6.30</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-slate-300 p-2">Modal Rendering (10M)</td>
+                            <td class="border border-slate-300 p-2">Headless Blender on NVIDIA L4 (I also found out a
+                                way to speed up the rendering, which is why this is cheaper than it would have been)
+                            </td>
+                            <td class="border border-slate-300 p-2">$0.000222 / sec</td>
+                            <td class="border border-slate-300 p-2">$2.00</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-slate-300 p-2">Colab CPU</td>
+                            <td class="border border-slate-300 p-2">Engine compilation / 4.5 GB .ply gen</td>
+                            <td class="border border-slate-300 p-2">$9.99 / 100 units</td>
+                            <td class="border border-slate-300 p-2">$5.50</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-slate-300 p-2">RunPod (10M IC)</td>
+                            <td class="border border-slate-300 p-2">Engine execution on RTX A5000</td>
+                            <td class="border border-slate-300 p-2">$0.37 / hr</td>
+                            <td class="border border-slate-300 p-2">$4.89</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-slate-300 p-2">Modal Storage Volume</td>
+                            <td class="border border-slate-300 p-2">Persistent 16.6 GiB point cloud storage</td>
+                            <td class="border border-slate-300 p-2">$0.09 / GiB</td>
+                            <td class="border border-slate-300 p-2">$1.49</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2 id="roadmap"
+                    class="font-serif text-3xl font-bold border-b border-black pb-2 scroll-mt-24 mt-12 mb-6">5.
+                    Future Roadmap</h2>
+                <ul class="list-disc pl-5 mb-6">
+                    <li><strong>Custom Static Arena Allocator:</strong> Implementing specialized, contiguous memory
+                        management specifically tailored for the dynamic tree architecture.</li>
+                    <li><strong>Zero-Copy C++ Extension:</strong> Moving away from PyFlameGPU overhead to run
+                        exclusively in C++, eliminating slow Python bottlenecks.</li>
+                    <li><strong>Hydrodynamics:</strong> Expanding the physics engine beyond pure N-body gravity to
+                        incorporate fluid grid solvers for interstellar gas clouds and nebulae.</li>
+                    <li><strong>Dynamic MAC calculation</strong>Rather than having the user set a value that they won't
+                        know is good, a dynamic MAC caculator could work to limit computational load. </li>
+                    <li>Larger scale improvements are indicated on the Github repository.</li>
+                </ul>
+
+            </article>
+        </div>
+    </main>
+
+    <footer class="border-t border-black mt-12">
+        <a href="#" class="block w-full bg-white hover:bg-slate-50 transition-colors py-8 group cursor-pointer">
+            <div class="max-w-7xl mx-auto px-6 text-center">
+                <span class="font-mono text-sm font-bold group-hover:underline ">&uarr; Back to
+                    Top</span>
+            </div>
+        </a>
+    </footer>
+    <script>
+        localStorage.setItem('visited_compoxel', 'true');
+    </script>
+
+    <!-- Telemetry Script -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const container = document.getElementById("telemetry-container");
+            if (!container) return;
+
+            const slug = container.getAttribute("data-project-slug");
+
+            fetch("../assets/data/telemetry.json")
+                .then(response => response.json())
+                .then(data => {
+                    const project = data.telemetry && data.telemetry[slug];
+                    const content = document.getElementById("telemetry-content");
+
+                    if (!project) {
+                        content.innerHTML = '<span class="font-mono text-sm text-slate-500">Not on TaskTracker</span>';
+                        return;
+                    }
+
+                    let colorClass = "text-slate-700";
+                    if (project.severity === "success") colorClass = "text-green-700";
+                    if (project.severity === "warning") colorClass = "text-amber-700";
+
+                    content.innerHTML = `
+ <div class="flex flex-col">
+ <div class="whitespace-nowrap">
+ <a href="https://task-tracker-web.fly.dev/?project=${slug}" target="_blank" class="font-mono text-sm font-bold hover:underline ${colorClass}">${project.status_badge} &nearr;</a>
+ <span class="font-mono text-sm text-black ml-1">(${project.tasks_completed}/${project.tasks_total})</span>
+ </div>
+ <div class="font-mono text-[10px] text-black truncate max-w-[200px]" title="${project.active_task}">&gt; ${project.active_task}</div>
+ </div>
+ `;
+                })
+                .catch(err => {
+                    const content = document.getElementById("telemetry-content");
+                    if (content) content.innerHTML = '<span class="font-mono text-sm text-slate-500">Not on TaskTracker</span>';
+                });
+        });
+    </script>
+
+    <!-- D3.js Graph Logic -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const container = document.getElementById('graph-container');
+            if (!container) return;
+
+            const telemetryContainer = document.getElementById("telemetry-container");
+            const currentProjectSlug = telemetryContainer ? telemetryContainer.getAttribute("data-project-slug") : "";
+
+            const nodes = [
+                { id: "Projects", url: "../projects.html", isCentral: true }, // Central Node
+                { id: "SmallSat Paper", url: "smallsat_paper.html", visitedKey: "visited_smallsat_paper", slug: "smallsat_paper" },
+                { id: "Hyperspectral VAE", url: "utat_vae.html", visitedKey: "visited_utat_vae", slug: "utat_vae" },
+                { id: "Memory Interface", url: "memory_interface.html", visitedKey: "visited_memory_interface", slug: "memory_interface" },
+                { id: "Wing Optimizer", url: "propeller_optimizer.html", visitedKey: "visited_propeller_optimizer", slug: "propeller_optimizer" },
+                { id: "Timmy and Tommy", url: "timmy_and_tommy.html", visitedKey: "visited_timmy_and_tommy", slug: "timmy_and_tommy" },
+                { id: "Compoxel", url: "compoxel.html", visitedKey: "visited_compoxel", slug: "compoxel" },
+                { id: "BioNERBERT", url: "bionerbert.html", visitedKey: "visited_bionerbert", slug: "bionerbert" },
+                { id: "Macropad", url: "macropad.html", visitedKey: "visited_macropad", slug: "macropad" }
+            ];
+
+            const links = [
+                { source: "Projects", target: "SmallSat Paper" },
+                { source: "Projects", target: "Hyperspectral VAE" },
+                { source: "Projects", target: "Memory Interface" },
+                { source: "Projects", target: "Wing Optimizer" },
+                { source: "Projects", target: "Timmy and Tommy" },
+                { source: "Projects", target: "Compoxel" },
+                { source: "Projects", target: "BioNERBERT" },
+                { source: "Projects", target: "Macropad" }
+            ];
+
+            let width = container.clientWidth;
+            let height = container.clientHeight;
+
+            const svg = d3.select("#graph-container").append("svg")
+                .attr("width", width)
+                .attr("height", height);
+
+            const simulation = d3.forceSimulation(nodes)
+                .force("link", d3.forceLink(links).id(d => d.id).distance(60))
+                .force("charge", d3.forceManyBody().strength(-150))
+                .force("center", d3.forceCenter(width / 2, height / 2))
+                .force("collide", d3.forceCollide().radius(d => d.isCentral ? 25 : 15));
+
+            const link = svg.append("g")
+                .selectAll("line")
+                .data(links)
+                .enter().append("line")
+                .attr("class", "link")
+                .attr("stroke", "#ccc")
+                .attr("stroke-width", 1.5);
+
+            const nodeGroup = svg.append("g")
+                .selectAll("g")
+                .data(nodes)
+                .enter().append("g")
+                .attr("class", "node-group")
+                .style("cursor", "pointer")
+                .call(d3.drag()
+                    .on("start", dragstarted)
+                    .on("drag", dragged)
+                    .on("end", dragended))
+                .on("click", (event, d) => {
+                    if (d.url !== "#") {
+                        window.location.href = d.url;
+                    }
+                })
+                .on("mouseover", (event, d) => {
+                    const tooltip = d3.select("#tooltip");
+                    tooltip.html(d.id)
+                        .style("left", (event.clientX + 10) + "px")
+                        .style("top", (event.clientY - 20) + "px")
+                        .style("opacity", 1);
+                })
+                .on("mousemove", (event) => {
+                    d3.select("#tooltip")
+                        .style("left", (event.clientX + 10) + "px")
+                        .style("top", (event.clientY - 20) + "px");
+                })
+                .on("mouseout", () => {
+                    d3.select("#tooltip").style("opacity", 0);
+                });
+
+            // Active node background highlight (Outer ring)
+            nodeGroup.filter(d => d.slug === currentProjectSlug)
+                .append("circle")
+                .attr("r", 13.5)
+                .attr("fill", "black");
+
+            // Main node circle
+            nodeGroup.append("circle")
+                .attr("r", d => d.isCentral ? 20 : 10)
+                .attr("fill", d => {
+                    if (d.isCentral) return "#f1f5f9";
+                    if (d.slug === currentProjectSlug) return "black";
+                    return localStorage.getItem(d.visitedKey) ? "black" : "white";
+                })
+                .attr("stroke", d => {
+                    if (d.isCentral) return "black";
+                    if (d.slug === currentProjectSlug) return "white";
+                    return "black";
+                })
+                .attr("stroke-width", d => {
+                    if (d.isCentral) return 2;
+                    if (d.slug === currentProjectSlug) return 3;
+                    return 2;
+                });
+
+            // Central node label
+            svg.append("g")
+                .selectAll("text")
+                .data(nodes.filter(d => d.isCentral))
+                .enter().append("text")
+                .text(d => d.id)
+                .attr("text-anchor", "middle")
+                .attr("dy", ".3em")
+                .attr("font-family", "JetBrains Mono")
+                .attr("font-size", "8px")
+                .attr("font-weight", "bold")
+                .attr("fill", "black")
+                .style("pointer-events", "none");
+
+            simulation.on("tick", () => {
+                nodeGroup.attr("transform", d => {
+                    d.x = Math.max(20, Math.min(width - 20, d.x));
+                    d.y = Math.max(20, Math.min(height - 20, d.y));
+                    return `translate(${d.x},${d.y})`;
+                });
+                link.attr("x1", d => d.source.x)
+                    .attr("y1", d => d.source.y)
+                    .attr("x2", d => d.target.x)
+                    .attr("y2", d => d.target.y);
+                svg.selectAll("text")
+                    .attr("x", d => d.x)
+                    .attr("y", d => d.y);
+            });
+
+            function dragstarted(event, d) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
+            }
+            function dragged(event, d) {
+                d.fx = event.x;
+                d.fy = event.y;
+            }
+            function dragended(event, d) {
+                if (!event.active) simulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+            }
+
+            window.addEventListener('resize', () => {
+                width = container.clientWidth;
+                height = container.clientHeight;
+                svg.attr("width", width).attr("height", height);
+                simulation.force("center", d3.forceCenter(width / 2, height / 2));
+                simulation.alpha(0.3).restart();
+            });
+        });
+    </script>
+
+
+    <!-- Mermaid JS -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'neutral',
+            flowchart: { useMaxWidth: false },
+            sequence: { useMaxWidth: false }
+        });
+
+        // Add drag-to-scroll functionality
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.querySelectorAll('.mermaid').forEach(container => {
+                    container.style.cursor = 'grab';
+                    let isDown = false;
+                    let startX, startY, scrollLeft, scrollTop;
+
+                    container.addEventListener('mousedown', (e) => {
+                        isDown = true;
+                        container.style.cursor = 'grabbing';
+                        startX = e.pageX - container.offsetLeft;
+                        startY = e.pageY - container.offsetTop;
+                        scrollLeft = container.scrollLeft;
+                        scrollTop = container.scrollTop;
+                    });
+                    container.addEventListener('mouseleave', () => {
+                        isDown = false;
+                        container.style.cursor = 'grab';
+                    });
+                    container.addEventListener('mouseup', () => {
+                        isDown = false;
+                        container.style.cursor = 'grab';
+                    });
+                    container.addEventListener('mousemove', (e) => {
+                        if (!isDown) return;
+                        e.preventDefault();
+                        const x = e.pageX - container.offsetLeft;
+                        const y = e.pageY - container.offsetTop;
+                        const walkX = (x - startX) * 1.5;
+                        const walkY = (y - startY) * 1.5;
+                        container.scrollLeft = scrollLeft - walkX;
+                        container.scrollTop = scrollTop - walkY;
+                    });
+                });
+            }, 500);
+        });
+    </script>
+
+    <!-- Custom YouTube Facade Script -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            document.querySelectorAll('.youtube-facade').forEach(facade => {
+                facade.addEventListener('click', function () {
+                    const videoId = this.getAttribute('data-video-id');
+                    const iframe = document.createElement('iframe');
+                    iframe.className = "absolute inset-0 w-full h-full";
+                    // color=white changes the progress bar. modestbranding removes the YT logo. rel=0 stops random recommendations.
+                    iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&color=white&modestbranding=1&rel=0`;
+                    iframe.title = "YouTube video player";
+                    iframe.frameBorder = "0";
+                    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+                    iframe.allowFullscreen = true;
+
+                    this.innerHTML = '';
+                    this.appendChild(iframe);
+                    this.classList.remove('cursor-pointer', 'group');
+                });
+            });
+        });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
+</body>
+
+
+</html>

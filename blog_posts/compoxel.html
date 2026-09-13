@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Compoxel Hybrid TreePM | Licheng Zheng</title>
+ 
+ <link rel="preconnect" href="https://fonts.googleapis.com">
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+ 
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" crossorigin="anonymous">
+
+ <script src="https://cdn.tailwindcss.com"></script>
+ <script>
+ tailwind.config = {
+ darkMode: 'class',
+ theme: {
+ extend: {
+ fontFamily: {
+ sans: ['Inter', 'sans-serif'],
+ serif: ['Playfair Display', 'serif'],
+ mono: ['JetBrains Mono', 'monospace'],
+ }
+ }
+ }
+ }
+ </script>
+ <style>
+ :root { color-scheme: light; }
+ ::selection { background-color: black; color: white; }
+ .article-body p { margin-bottom: 1.5rem; line-height: 1.8; }
+ .article-body h2 { margin-top: 3rem; margin-bottom: 1rem; }
+ .article-body ul { list-style-type: square; margin-left: 1.5rem; margin-bottom: 1.5rem; }
+ .article-body li { margin-bottom: 0.5rem; }
+ details > summary { list-style: none; }
+ details > summary::-webkit-details-marker { display: none; }
+ </style>
+</head>
+<body class="bg-white text-black font-sans antialiased min-h-screen flex flex-col">
+
+ <nav class="sticky top-0 z-50 bg-white border-b border-black w-full px-6 py-4">
+ <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+ <div class="font-serif font-bold text-xl tracking-tight">L. Zheng</div>
+ <div class="flex flex-wrap justify-center gap-6">
+ <a href="index.html" class="font-mono text-sm text-black hover:underline hover:font-bold transition-all">Home</a>
+ <a href="complex-systems.html" class="font-mono text-sm text-black hover:underline hover:font-bold transition-all">Systems and Hardware</a>
+ </div>
+ </div>
+ </nav>
+
+ <main class="flex-grow max-w-7xl mx-auto w-full px-6 py-12 md:py-16">
+ 
+ <div class="mb-12 font-mono text-xs text-slate-500 border-b border-black pb-4">
+ <a href="complex-systems.html" class="hover:text-black hover:underline">&larr; Systems and Hardware</a> / Compoxel TreePM
+ </div>
+
+ <div class="flex flex-col lg:flex-row gap-12 lg:gap-20 items-start">
+ 
+ <aside class="hidden lg:block lg:w-64 flex-shrink-0 sticky top-28">
+ <span class="font-mono text-xs font-bold border-b-2 border-black pb-2 mb-4 block w-full">Contents</span>
+ <nav class="flex flex-col space-y-3 font-sans text-sm border-l border-slate-300 pl-4">
+ <a href="#abstract" class="text-slate-500 hover:text-black transition-colors">0. Abstract and Metadata</a>
+ <a href="#showcase" class="text-slate-500 hover:text-black transition-colors">1. The 10-Million Run</a>
+ <a href="#comparison" class="text-slate-500 hover:text-black transition-colors">2. Algorithmic Scaling</a>
+ <a href="#math" class="text-slate-500 hover:text-black transition-colors">3. Mathematical Core</a>
+ <a href="#pipeline" class="text-slate-500 hover:text-black transition-colors">4. Cloud I/O Pipeline</a>
+ <a href="#bom" class="text-slate-500 hover:text-black transition-colors">5. Infrastructure BOM</a>
+ <a href="#sim" class="text-slate-500 hover:text-black transition-colors">6. Live Mesh Visualization</a>
+ </nav>
+ </aside>
+
+ <article class="flex-grow max-w-4xl article-body w-full">
+ 
+ <header class="mb-12" id="abstract">
+ <h1 class="font-serif text-5xl md:text-6xl font-bold tracking-tight leading-tight mb-6">
+ Compoxel: Bypassing I/O Bottlenecks in 10-Million Entity GPU Simulations
+ </h1>
+ 
+ <div class="grid grid-cols-2 md:grid-cols-4 gap-y-6 gap-x-4 border-y border-black py-4 mb-8">
+ <div>
+ <span class="font-mono text-[10px] text-slate-500 block mb-1">Status</span>
+ <span class="font-mono text-sm font-bold bg-black text-white px-2 py-0.5">Completed</span>
+ </div>
+ <div>
+ <span class="font-mono text-[10px] text-slate-500 block mb-1">Scale</span>
+ <span class="font-mono text-sm font-bold">10,000,000 Agents</span>
+ </div>
+ <div class="col-span-2 md:col-span-2">
+ <span class="font-mono text-[10px] text-slate-500 block mb-1">Tech Stack</span>
+ <div class="flex flex-wrap gap-2">
+ <span class="font-mono text-xs bg-white border border-black px-1">CUDA</span>
+ <span class="font-mono text-xs bg-white border border-black px-1">Modal</span>
+ <span class="font-mono text-xs bg-white border border-black px-1">Python</span>
+ </div>
+ </div>
+ </div>
+
+ <p class="font-sans text-xl leading-relaxed text-slate-800">
+ A high-performance physics architecture built to simulate 10 million individual entities. By stripping out Python CPU compression and utilizing raw memory-to-disk binary dumps, the system exports ~100GB of simulation data directly through data center backbones to distributed Blender rendering farms.
+ </p>
+ </header>
+
+ <h2 id="showcase" class="font-serif text-3xl font-bold border-b border-black pb-2 scroll-mt-24">1. The 10-Million Entity Run</h2>
+ <p>
+ Simulating fluid-like gravitational dynamics for 10 million stars requires an engine capable of handling extreme spatial density without catastrophic warp divergence. Rendered across 100 parallel T4 cloud GPUs via Modal, the final 800-frame sequence demonstrates the Hybrid TreePM algorithm operating at maximum scale.
+ </p>
+
+ <figure class="my-8 w-full border border-black p-2 bg-slate-50">
+ <video autoplay loop muted playsinline class="w-full border border-black bg-white aspect-video object-cover">
+ <source src="your_10m_video.mp4" type="video/mp4">
+ Your browser does not support the video tag.
+ </video>
+ <figcaption class="mt-3 text-center font-serif italic text-sm text-slate-700">
+ 800 frames of execution simulating 10,000,000 autonomous entities.
+ </figcaption>
+ </figure>
+
+ <h2 id="comparison" class="font-serif text-3xl font-bold border-b border-black pb-2 scroll-mt-24">2. Algorithmic Scaling and Comparison</h2>
+ <p>
+ To validate the efficiency of the TreePM implementation, a 500k-entity benchmark was executed across four distinct algorithmic pathways. The $O(N^2)$ Naive approach required ~13 hours of compute time, whereas the Hybrid architecture resolved the identical 800-frame state in roughly 6 minutes.
+ </p>
+
+ <figure class="my-8 w-full">
+ <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-black border border-black">
+ 
+ <div class="bg-white p-3 flex flex-col">
+ <video autoplay loop muted playsinline class="w-full aspect-square border border-black mb-3 object-cover bg-slate-100">
+ <source src="naive_video.mp4" type="video/mp4">
+ </video>
+ <span class="font-mono text-xs font-bold text-red-600">Naive O(N²)</span>
+ <span class="font-sans text-xs text-slate-700 mt-1 flex-grow">250 billion interactions per frame. Severe bottleneck.</span>
+ </div>
+
+ <div class="bg-white p-3 flex flex-col">
+ <video autoplay loop muted playsinline class="w-full aspect-square border border-black mb-3 object-cover bg-slate-100">
+ <source src="tree_video.mp4" type="video/mp4">
+ </video>
+ <span class="font-mono text-xs font-bold ">Tree O(N log N)</span>
+ <span class="font-sans text-xs text-slate-700 mt-1 flex-grow">Barnes-Hut approximation. Fast but less precise at close range.</span>
+ </div>
+
+ <div class="bg-white p-3 flex flex-col">
+ <video autoplay loop muted playsinline class="w-full aspect-square border border-black mb-3 object-cover bg-slate-100">
+ <source src="mesh_video.mp4" type="video/mp4">
+ </video>
+ <span class="font-mono text-xs font-bold ">Particle-Mesh (PM)</span>
+ <span class="font-sans text-xs text-slate-700 mt-1 flex-grow">Grid-based density mapping. Solves Poisson equation globally.</span>
+ </div>
+
+ <div class="bg-white p-3 flex flex-col">
+ <video autoplay loop muted playsinline class="w-full aspect-square border border-black mb-3 object-cover bg-slate-100">
+ <source src="hybrid_video.mp4" type="video/mp4">
+ </video>
+ <span class="font-mono text-xs font-bold text-green-600">Hybrid TreePM</span>
+ <span class="font-sans text-xs text-slate-700 mt-1 flex-grow">Combined forces. Short-range exact physics, long-range mesh gravity.</span>
+ </div>
+
+ </div>
+ </figure>
+
+ <h2 id="math" class="font-serif text-3xl font-bold border-b border-black pb-2 scroll-mt-24">3. Mathematical Core</h2>
+ <p>
+ The foundation of the Particle-Mesh step relies on mapping discrete particle masses onto a continuous grid, allowing us to solve the Poisson equation for the gravitational potential $\Phi$:
+ </p>
+ 
+ <div class="my-6 border border-black bg-slate-50 p-6 overflow-x-auto text-center text-lg">
+ $$ \nabla^2 \Phi = 4 \pi G \rho $$
+ <span class="block mt-4 font-mono text-xs text-slate-500 text-left border-t border-black pt-2">Poisson Equation for Gravity</span>
+ </div>
+ 
+ <p>
+ By splitting the force calculation, the engine avoids the standard $N^2$ trap. Short-range forces are handled via direct $P^3M$ handshake integrations, while distant masses are treated as voxelized densities.
+ </p>
+
+ <h2 id="pipeline" class="font-serif text-3xl font-bold border-b border-black pb-2 scroll-mt-24">4. Cloud I/O Pipeline and CPU Bottleneck</h2>
+ <p>
+ Profiling the A100 revealed that execution was bound not by GPU compute, but by the CPU attempting to single-thread `ZIP_DEFLATED` compression on 120MB memory arrays every frame. The solution was to trade disk space for compute time. By switching to `ZIP_STORED`, the engine dumps raw binary directly to the NVMe SSD, bypassing the CPU entirely.
+ </p>
+
+ <div class="my-8">
+ <div class="bg-black text-white font-mono text-xs px-4 py-1 border border-black border-b-0 inline-block ">
+ bash / cloud_transfer_log.txt
+ </div>
+ <pre class="bg-slate-900 text-green-400 p-4 overflow-x-auto font-mono text-sm border border-black leading-relaxed"><code>$ Prepping Modal Volume (Handling Overwrites)...
+> modal volume create compoxel-storage || true
+[OK] Volume confirmed.
+
+$ Blasting massive uncompressed ZIP directly to Modal...
+> modal volume put compoxel-storage 10M_hybrid_frames.zip /
+[SUCCESS] Uploading file(s) to volume... 100%
+[SUCCESS] 96.4 GB transferred via internal Google-to-Modal backbone.</code></pre>
+ </div>
+
+ <h2 id="bom" class="font-serif text-3xl font-bold border-b border-black pb-2 scroll-mt-24">5. Infrastructure Bill of Materials</h2>
+ <p>
+ To orchestrate a 100-GPU parallel render farm without downloading 100GB of uncompressed data locally, the following cloud hardware and services were provisioned:
+ </p>
+
+ <div class="my-8 border border-black overflow-hidden font-sans text-sm md:text-base">
+ <div class="grid grid-cols-12 bg-slate-100 border-b border-black font-mono text-xs text-slate-700 p-3">
+ <div class="col-span-6 md:col-span-5">Subsystem / Resource</div>
+ <div class="col-span-2 hidden md:block">Provider</div>
+ <div class="col-span-2 md:col-span-1 text-right">Qty</div>
+ <div class="col-span-2 text-right hidden md:block">Specs</div>
+ <div class="col-span-4 md:col-span-2 text-right">Function</div>
+ </div>
+
+ <div class="font-mono text-sm text-black">
+ <div class="grid grid-cols-12 p-3 border-b border-black hover:bg-slate-50 transition-colors items-center bg-white">
+ <div class="col-span-6 md:col-span-5 pl-3 font-bold">A100 Compute Instance</div>
+ <div class="col-span-2 hidden md:block text-slate-500 text-xs">Google Colab</div>
+ <div class="col-span-2 md:col-span-1 text-right">1</div>
+ <div class="col-span-2 text-right hidden md:block">240GB Disk</div>
+ <div class="col-span-4 md:col-span-2 text-right text-xs">Physics Engine</div>
+ </div>
+
+ <div class="grid grid-cols-12 p-3 border-b border-black hover:bg-slate-50 transition-colors items-center bg-white">
+ <div class="col-span-6 md:col-span-5 pl-3 font-bold">T4 GPU Serverless Containers</div>
+ <div class="col-span-2 hidden md:block text-slate-500 text-xs">Modal Labs</div>
+ <div class="col-span-2 md:col-span-1 text-right">100</div>
+ <div class="col-span-2 text-right hidden md:block">16GB VRAM</div>
+ <div class="col-span-4 md:col-span-2 text-right text-xs">Parallel Render</div>
+ </div>
+
+ <div class="grid grid-cols-12 p-3 hover:bg-slate-50 transition-colors items-center bg-white">
+ <div class="col-span-6 md:col-span-5 pl-3 font-bold">Persistent Cloud Volume</div>
+ <div class="col-span-2 hidden md:block text-slate-500 text-xs">Modal Labs</div>
+ <div class="col-span-2 md:col-span-1 text-right">1</div>
+ <div class="col-span-2 text-right hidden md:block">100GB+ NVMe</div>
+ <div class="col-span-4 md:col-span-2 text-right text-xs">Data Storage</div>
+ </div>
+ </div>
+ </div>
+
+ <h2 id="sim" class="font-serif text-3xl font-bold border-b border-black pb-2 scroll-mt-24">6. Live Spatial Hashing Visualization</h2>
+ <p>
+ To conceptualize how the Hybrid TreePM algorithm maps entities to grid densities, I wrote a live HTML5 Canvas simulation. The algorithm partitions space and identifies dense clusters (rendered as connected sub-graphs), drastically reducing the calculation burden of distant nodes.
+ </p>
+
+ <figure class="my-8 w-full border border-black p-2 bg-slate-50">
+ <canvas id="meshSimCanvas" class="w-full h-[400px] border border-black bg-white"></canvas>
+ <figcaption class="mt-3 text-center font-serif italic text-sm text-slate-700">
+ Live JS Execution: Nodes within spatial threshold form local mesh calculations.
+ </figcaption>
+ </figure>
+
+ </article>
+
+ </div>
+ </main>
+
+ <footer class="border-t border-black bg-white py-6 mt-12">
+ <div class="max-w-7xl mx-auto px-6 text-center flex flex-col md:flex-row justify-between items-center gap-4">
+ <p class="font-mono text-xs text-slate-500">&copy; 2026 Licheng Zheng. Rendered for web.</p>
+ <a href="#" class="font-mono text-xs font-bold hover:underline">&uarr; Back to Top</a>
+ </div>
+ </footer>
+
+ <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js" crossorigin="anonymous"></script>
+ <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+ <script>
+ document.addEventListener("DOMContentLoaded", function() {
+ renderMathInElement(document.body, {
+ delimiters: [
+ {left: '$$', right: '$$', display: true},
+ {left: '$', right: '$', display: false},
+ {left: '\\(', right: '\\)', display: false},
+ {left: '\\[', right: '\\]', display: true}
+ ],
+ throwOnError: false
+ });
+ });
+ </script>
+
+ <script>
+ document.addEventListener('DOMContentLoaded', () => {
+ const canvas = document.getElementById('meshSimCanvas');
+ if (!canvas) return;
+ const ctx = canvas.getContext('2d');
+ 
+ // Handle resizing for high-DPI displays
+ function resize() {
+ canvas.width = canvas.parentElement.clientWidth - 16; // minus padding
+ canvas.height = 400;
+ }
+ window.addEventListener('resize', resize);
+ resize();
+
+ // Particle System
+ const NUM_PARTICLES = 120;
+ const CONNECT_DISTANCE = 80;
+ let particles = [];
+
+ for (let i = 0; i < NUM_PARTICLES; i++) {
+ particles.push({
+ x: Math.random() * canvas.width,
+ y: Math.random() * canvas.height,
+ vx: (Math.random() - 0.5) * 1.5,
+ vy: (Math.random() - 0.5) * 1.5
+ });
+ }
+
+ function draw() {
+ ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+ // Update positions and bounce off walls
+ particles.forEach(p => {
+ p.x += p.vx;
+ p.y += p.vy;
+ if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+ if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+ });
+
+ // Draw connections (The "Mesh" aspect)
+ ctx.lineWidth = 1;
+ for (let i = 0; i < particles.length; i++) {
+ for (let j = i + 1; j < particles.length; j++) {
+ let dx = particles[i].x - particles[j].x;
+ let dy = particles[i].y - particles[j].y;
+ let dist = Math.sqrt(dx * dx + dy * dy);
+
+ if (dist < CONNECT_DISTANCE) {
+ ctx.beginPath();
+ // Fade line based on distance
+ let alpha = 1 - (dist / CONNECT_DISTANCE);
+ ctx.strokeStyle = `rgba(0, 0, 0, ${alpha * 0.5})`;
+ ctx.moveTo(particles[i].x, particles[i].y);
+ ctx.lineTo(particles[j].x, particles[j].y);
+ ctx.stroke();
+ }
+ }
+ }
+
+ // Draw particles
+ ctx.fillStyle = '#000';
+ particles.forEach(p => {
+ ctx.beginPath();
+ ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+ ctx.fill();
+ });
+
+ requestAnimationFrame(draw);
+ }
+ 
+ draw();
+ });
+ </script>
+</body>
+</html>

@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Compoxel Gravity Engine Deep Dive | Licheng Zheng</title>
+ <link rel="preconnect" href="https://fonts.googleapis.com">
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link
+ href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap"
+ rel="stylesheet">
+ <script src="https://cdn.tailwindcss.com"></script>
+ <script>
+ tailwind.config = {
+ darkMode: 'class',
+ theme: {
+ extend: {
+ fontFamily: {
+ sans: ['Inter', 'sans-serif'],
+ serif: ['Playfair Display', 'serif'],
+ mono: ['JetBrains Mono', 'monospace'],
+ }
+ }
+ }
+ }
+ </script>
+ <style>
+ :root {
+ color-scheme: light;
+ }
+
+ ::selection {
+ background-color: black;
+ color: white;
+ }
+
+ .article-body p {
+ margin-bottom: 1.5rem;
+ line-height: 1.8;
+ }
+
+ .article-body ul {
+ list-style-type: square;
+ margin-left: 1.5rem;
+ margin-bottom: 1.5rem;
+ }
+
+ .article-body li {
+ margin-bottom: 0.5rem;
+ }
+ </style>
+</head>
+
+<body class="bg-white text-black font-sans antialiased min-h-screen flex flex-col">
+
+ <!-- Navigation -->
+ <nav class="sticky top-0 z-50 bg-white border-b border-black w-full px-6 py-4">
+ <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+ <div class="font-serif font-bold text-xl tracking-tight">L. Zheng</div>
+ <div class="flex flex-wrap justify-center gap-6">
+ <a href="../index.html"
+ class="font-mono text-sm text-black hover:underline hover:font-bold transition-all">Home</a>
+ <a href="../projects.html"
+ class="font-mono text-sm text-black hover:underline hover:font-bold transition-all">Projects</a>
+ </div>
+ </div>
+ </nav>
+
+ <!-- Main Container -->
+ <main class="flex-grow max-w-7xl mx-auto w-full px-6 py-12 md:py-16">
+
+ <div class="mb-12 font-mono text-xs text-slate-500 border-b border-black pb-4">
+ <a href="../projects.html" class="hover:text-black hover:underline">&larr; Projects</a> / Compoxel N-Body
+ </div>
+
+ <div class="flex flex-col lg:flex-row gap-12 lg:gap-20 items-start">
+
+ <aside class="hidden lg:block lg:w-64 flex-shrink-0 sticky top-28">
+ <span
+ class="font-mono text-xs font-bold border-b-2 border-black pb-2 mb-4 block w-full">Contents</span>
+ <nav class="flex flex-col space-y-3 font-sans text-sm border-l border-slate-300 pl-4">
+ <a href="#abstract" class="text-slate-500 hover:text-black transition-colors">0. Abstract &
+ Metadata</a>
+ <a href="#methods" class="text-slate-500 hover:text-black transition-colors">1. Algorithmic
+ Architecture</a>
+ <a href="#benchmarking" class="text-slate-500 hover:text-black transition-colors">2. Performance
+ Metrics</a>
+ <a href="#constraints" class="text-slate-500 hover:text-black transition-colors">3. Hardware
+ Constraints</a>
+ <a href="#infrastructure" class="text-slate-500 hover:text-black transition-colors">4. Pipeline
+ Overhead</a>
+ </nav>
+ </aside>
+
+ <article class="flex-grow max-w-3xl article-body">
+
+ <header class="mb-12" id="abstract">
+ <h1 class="font-serif text-5xl md:text-6xl font-bold tracking-tight leading-tight mb-6">
+ Compoxel N-Body Gravity Engine
+ </h1>
+
+ <div class="grid grid-cols-2 gap-4 border-y border-black py-4 mb-8">
+ <div>
+ <span class="font-mono text-[10px] text-slate-500 block mb-1">Status</span>
+ <span class="font-mono text-sm font-bold bg-black text-white px-2 py-0.5">COMPLETED</span>
+ </div>
+ <div>
+ <span class="font-mono text-[10px] text-slate-500 block mb-1">Tech Stack</span>
+ <span class="font-mono text-sm">CUDA, C++, PyFlameGPU, Modal</span>
+ </div>
+ </div>
+
+ <p class="font-sans text-xl leading-relaxed text-slate-800 font-bold">
+ Compoxel is a high-performance, massively parallel N-body gravity engine built in pure C++ and
+ CUDA. By implementing a custom Hybrid TreePM (Tree Particle-Mesh) algorithm with dynamic density
+ routing, the engine mitigates SIMT warp divergence and scales to simulate over 10 million
+ entities entirely in VRAM.
+ </p>
+ </header>
+
+ <p class="italic text-slate-500 mt-4 border-l-4 border-slate-300 pl-4 mb-10">Insert Full 10 Million
+ Entity Cinematic Render and Per-Frame Compute Time Graphs here.</p>
+
+ <h2 id="methods"
+ class="font-serif text-3xl font-bold border-b border-black pb-2 scroll-mt-24 mt-12 mb-6">1.
+ Algorithmic Architecture and Methods</h2>
+
+ <p>Gravitational influence for N-bodies is an $O(N^2)$ computation per time step. To bypass this
+ computational bottleneck, I implemented two distinct optimization algorithms—Hierarchical Tree and
+ Particle-Mesh—and integrated them into a dynamic Hybrid TreePM architecture.</p>
+
+ <h3 class="font-bold text-lg mt-6 mb-2">Method 1: The Naive Baseline $O(N^2)$</h3>
+ <p>This is the ground-truth brute-force calculation where every entity calculates its attraction to
+ every other object. Gravitational softening ($\epsilon^2$) is injected into the denominator of the
+ force calculation ($F = G\frac{m_1 m_2}{r^2+\epsilon^2}$) to mathematically cap maximum force and
+ prevent slingshotting to infinity as distance $r$ approaches zero.</p>
+
+ <h3 class="font-bold text-lg mt-6 mb-2">Method 2: Hierarchical Center of Mass Voxels (Tree) $O(N \log
+ N)$</h3>
+ <p>Adapted from the Barnes-Hut algorithm for sparse environments. The bounding box is hierarchically
+ subdivided into voxels (L1 to L3). For distant voxels passing the Multipole Acceptance Criterion
+ (MAC), the algorithm computes gravitational attraction against the voxel's center of mass rather
+ than individual stars, massively reducing compute load.</p>
+
+ <h3 class="font-bold text-lg mt-6 mb-2">Method 3: Force Field (Particle-Mesh) $O(N \log N)$</h3>
+ <p>For high-density regions, the GPU falls back to $O(N^2)$ loops in the Tree method. To mitigate this,
+ a force field is generated using Cloud-In-Cell (CIC) scattering. Mass is proportionally spread to
+ the corners of subdivided mesh cubes, creating a global potential field that maintains a constant
+ computation cost regardless of particle density.</p>
+
+ <h3 class="font-bold text-lg mt-6 mb-2">Method 4: The Hybrid TreePM Engine</h3>
+ <p>This architecture seamlessly routes GPU warps based on a dynamic density heuristic
+ (<code>IS_DENSE</code>). If an L1 voxel exceeds the threshold (e.g., 2,000 stars), warps are routed
+ to the Particle-Mesh solver. Sparse regions continue utilizing the Tree method. This eliminates SIMT
+ warp divergence in galactic cores and completely prevents the GPU from falling back to brute-force
+ pointer chasing.</p>
+
+ <p class="italic text-slate-500 mt-4 border-l-4 border-slate-300 pl-4 mb-10">Insert 500k Side-by-Side
+ Render Comparison (Mesh vs. Tree vs. Naive vs. Hybrid) here.</p>
+
+ <h2 id="benchmarking"
+ class="font-serif text-3xl font-bold border-b border-black pb-2 scroll-mt-24 mt-12 mb-6">2.
+ Performance and Scalability Benchmarking</h2>
+
+ <p>All benchmarks were strictly standardized on NVIDIA T4 GPUs. To isolate computational time from I/O
+ overhead, figures represent the average of 6 frames, taken only after 2 uncounted "warm-up" frames
+ to ensure PCIe P-states reached P0 utilization and JIT compilation was complete.</p>
+
+ <h3 class="font-bold text-lg mt-6 mb-4">Execution Time Latency</h3>
+ <table class="w-full text-sm text-left font-sans border-collapse mb-8">
+ <thead>
+ <tr>
+ <th class="border border-black bg-slate-100 p-2 font-mono text-xs ">Particle Count
+ (N)</th>
+ <th class="border border-black bg-slate-100 p-2 font-mono text-xs ">Naive (ms)</th>
+ <th class="border border-black bg-slate-100 p-2 font-mono text-xs ">Tree (ms)</th>
+ <th class="border border-black bg-slate-100 p-2 font-mono text-xs ">Pure Mesh (ms)
+ </th>
+ <th class="border border-black bg-slate-100 p-2 font-mono text-xs ">Hybrid TreePM
+ (ms)</th>
+ </tr>
+ </thead>
+ <tbody>
+ <tr>
+ <td class="border border-slate-300 p-2">100,000</td>
+ <td class="border border-slate-300 p-2">130.25</td>
+ <td class="border border-slate-300 p-2">185.21</td>
+ <td class="border border-slate-300 p-2">158.87</td>
+ <td class="border border-slate-300 p-2">164.54</td>
+ </tr>
+ <tr>
+ <td class="border border-slate-300 p-2">500,000</td>
+ <td class="border border-slate-300 p-2">3059.95</td>
+ <td class="border border-slate-300 p-2">848.86</td>
+ <td class="border border-slate-300 p-2">708.16</td>
+ <td class="border border-slate-300 p-2">868.93</td>
+ </tr>
+ <tr>
+ <td class="border border-slate-300 p-2">1,000,000</td>
+ <td class="border border-slate-300 p-2">11815.10</td>
+ <td class="border border-slate-300 p-2">1783.50</td>
+ <td class="border border-slate-300 p-2">1474.25</td>
+ <td class="border border-slate-300 p-2">2264.61</td>
+ </tr>
+ <tr>
+ <td class="border border-slate-300 p-2">5,000,000</td>
+ <td class="border border-slate-300 p-2">264285.20</td>
+ <td class="border border-slate-300 p-2">27271.80</td>
+ <td class="border border-slate-300 p-2">19512.37</td>
+ <td class="border border-slate-300 p-2">50441.12</td>
+ </tr>
+ <tr>
+ <td class="border border-slate-300 p-2">10,000,000</td>
+ <td class="border border-slate-300 p-2 text-red-700 font-bold">DNF (Timeout)</td>
+ <td class="border border-slate-300 p-2">96985.15</td>
+ <td class="border border-slate-300 p-2">63649.05</td>
+ <td class="border border-slate-300 p-2">209969.00</td>
+ </tr>
+ </tbody>
+ </table>
+
+ <p class="italic text-slate-500 mt-4 border-l-4 border-slate-300 pl-4 mb-10">Insert Empirical Curve
+ Fitting Graph here.</p>
+
+ <h3 class="font-bold text-lg mt-6 mb-2">Empirical Big-O Curve Fitting</h3>
+ <p>Using Scipy, the benchmark data was fitted to theoretically modeled equations. The analysis yielded
+ the following $R^2$ exact fits:</p>
+ <ul class="list-disc pl-5 mb-6">
+ <li><strong>Naive $O(N^2)$:</strong> $T = 1.05\times 10^{-5}\cdot N^2 + 0.56$ ($R^2 = 1.0000$)</li>
+ <li><strong>Tree $O(N \log N)$:</strong> $T = 7.25\times 10^{-4}\cdot N \log_2(N) - 4.94$ ($R^2 =
+ 0.9694$)</li>
+ <li><strong>Mesh $O(N \log N)$:</strong> $T = 4.77\times 10^{-4}\cdot N \log_2(N) - 2.87$ ($R^2 =
+ 0.9773$)</li>
+ <li><strong>Hybrid $O(N \log N)$:</strong> $T = 1.56\times 10^{-3}\cdot N \log_2(N) - 12.75$ ($R^2 =
+ 0.9545$)</li>
+ </ul>
+
+ <h2 id="constraints"
+ class="font-serif text-3xl font-bold border-b border-black pb-2 scroll-mt-24 mt-12 mb-6">3.
+ Validation and Architectural Bottlenecks</h2>
+
+ <h3 class="font-bold text-lg mt-6 mb-4">Error Rate Analysis (Compared to Ground Truth Naive)</h3>
+ <table class="w-full text-sm text-left font-sans border-collapse mb-8">
+ <thead>
+ <tr>
+ <th class="border border-black bg-slate-100 p-2 font-mono text-xs ">Algorithm (1M
+ Entities)</th>
+ <th class="border border-black bg-slate-100 p-2 font-mono text-xs ">Global MSE</th>
+ <th class="border border-black bg-slate-100 p-2 font-mono text-xs ">P99 Error</th>
+ <th class="border border-black bg-slate-100 p-2 font-mono text-xs ">Max Absolute
+ Error</th>
+ </tr>
+ </thead>
+ <tbody>
+ <tr>
+ <td class="border border-slate-300 p-2">Tree</td>
+ <td class="border border-slate-300 p-2">135.41</td>
+ <td class="border border-slate-300 p-2">22.66</td>
+ <td class="border border-slate-300 p-2">34.40</td>
+ </tr>
+ <tr>
+ <td class="border border-slate-300 p-2">Mesh</td>
+ <td class="border border-slate-300 p-2">134.84</td>
+ <td class="border border-slate-300 p-2">22.59</td>
+ <td class="border border-slate-300 p-2">36.23</td>
+ </tr>
+ <tr>
+ <td class="border border-slate-300 p-2">Hybrid TreePM</td>
+ <td class="border border-slate-300 p-2">134.96</td>
+ <td class="border border-slate-300 p-2">22.60</td>
+ <td class="border border-slate-300 p-2">34.95</td>
+ </tr>
+ </tbody>
+ </table>
+
+ <h3 class="font-bold text-lg mt-6 mb-2">Stress Testing Hardware Constraints (The 5M Entity Wall)</h3>
+ <p>During stress testing at 5,000,000 entities, both the Pure Tree and Hybrid TreePM algorithms failed
+ to complete a single frame before triggering a 3,600-second hardware timeout. This was not a VRAM
+ out-of-memory error, but a catastrophic architectural bottleneck:</p>
+ <ul class="list-disc pl-5 mb-6">
+ <li><strong>Cache Thrashing (Pure Tree):</strong> Under extreme density, the Multipole Acceptance
+ Criterion forces the system into $O(N^2)$ direct computation. Because the tree is structured
+ hierarchically and not contiguously in memory, the GPU is forced to jump around VRAM (pointer
+ chasing). This destroys memory locality, making it drastically slower than the naive approach.
+ </li>
+ <li><strong>P3M Cutoff Tuning (Hybrid):</strong> The hybrid method crashed due to sub-optimal tuning
+ of the short-range cutoff radius ($r_c$). Because the short-range entities were not in
+ contiguous memory, the exact calculations slowed to a halt.</li>
+ </ul>
+
+ <h2 id="infrastructure"
+ class="font-serif text-3xl font-bold border-b border-black pb-2 scroll-mt-24 mt-12 mb-6">4.
+ Infrastructure and Pipeline Overhead</h2>
+
+ <p class="italic text-slate-500 mt-4 border-l-4 border-slate-300 pl-4 mb-10">Insert Mermaid System
+ Architecture Flowchart (Initialize Tensors -> Hash -> MAC -> Kinematics -> NVMe Dump) here.</p>
+
+ <h3 class="font-bold text-lg mt-6 mb-4">Serverless Compute Bill of Materials</h3>
+ <p>To reduce infrastructure costs for the 10 million entity collision, parallel compute workflows were
+ distributed across Modal and RunPod. The total cost to generate and render the cinematic simulation
+ was $20.18.</p>
+
+ <table class="w-full text-sm text-left font-sans border-collapse mb-8">
+ <thead>
+ <tr>
+ <th class="border border-black bg-slate-100 p-2 font-mono text-xs ">Component</th>
+ <th class="border border-black bg-slate-100 p-2 font-mono text-xs ">Purpose</th>
+ <th class="border border-black bg-slate-100 p-2 font-mono text-xs ">Cost Metric
+ </th>
+ <th class="border border-black bg-slate-100 p-2 font-mono text-xs ">Total Cost</th>
+ </tr>
+ </thead>
+ <tbody>
+ <tr>
+ <td class="border border-slate-300 p-2">Modal Rendering (500k)</td>
+ <td class="border border-slate-300 p-2">Parallel headless Blender (10x NVIDIA T4)</td>
+ <td class="border border-slate-300 p-2">$0.000164 / sec</td>
+ <td class="border border-slate-300 p-2">$6.30</td>
+ </tr>
+ <tr>
+ <td class="border border-slate-300 p-2">Modal Rendering (10M)</td>
+ <td class="border border-slate-300 p-2">Headless Blender on NVIDIA L4</td>
+ <td class="border border-slate-300 p-2">$0.000222 / sec</td>
+ <td class="border border-slate-300 p-2">$2.00</td>
+ </tr>
+ <tr>
+ <td class="border border-slate-300 p-2">Colab CPU</td>
+ <td class="border border-slate-300 p-2">Engine compilation / 4.5 GB .ply gen</td>
+ <td class="border border-slate-300 p-2">$9.99 / 100 units</td>
+ <td class="border border-slate-300 p-2">$5.50</td>
+ </tr>
+ <tr>
+ <td class="border border-slate-300 p-2">RunPod (10M IC)</td>
+ <td class="border border-slate-300 p-2">Engine execution on RTX A5000</td>
+ <td class="border border-slate-300 p-2">$0.37 / hr</td>
+ <td class="border border-slate-300 p-2">$4.89</td>
+ </tr>
+ <tr>
+ <td class="border border-slate-300 p-2">Modal Storage Volume</td>
+ <td class="border border-slate-300 p-2">Persistent 16.6 GiB point cloud storage</td>
+ <td class="border border-slate-300 p-2">$0.09 / GiB</td>
+ <td class="border border-slate-300 p-2">$1.49</td>
+ </tr>
+ </tbody>
+ </table>
+
+ </article>
+ </div>
+ </main>
+
+ <footer class="border-t border-black bg-white py-6 mt-12">
+ <div class="max-w-7xl mx-auto px-6 text-center flex flex-col md:flex-row justify-between items-center gap-4">
+ 
+ <a href="#" class="font-mono text-xs font-bold hover:underline">&uarr; Back to Top</a>
+ </div>
+ </footer>
+ <script>
+ localStorage.setItem('visited_compoxel', 'true');
+ </script>
+</body>
+
+</html>

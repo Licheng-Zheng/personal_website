@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Hyperspectral VAE | Licheng Zheng</title>
+ <link rel="preconnect" href="https://fonts.googleapis.com">
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+ <script src="https://cdn.tailwindcss.com"></script>
+ <script>
+ tailwind.config = {
+ darkMode: 'class',
+ theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], serif: ['Playfair Display', 'serif'], mono: ['JetBrains Mono', 'monospace'], } } }
+ }
+ </script>
+ <style>
+ :root { color-scheme: light; }
+ ::selection { background-color: black; color: white; }
+ .article-body p { margin-bottom: 1.5rem; line-height: 1.8; }
+ .article-body ul { list-style-type: square; margin-left: 1.5rem; margin-bottom: 1.5rem; }
+ .article-body li { margin-bottom: 0.5rem; }
+ pre, pre[class*="language-"] { 
+    border-left: 6px solid #fdba74 !important; 
+    box-shadow: none !important; 
+    white-space: pre-wrap !important; 
+    word-break: break-word !important; 
+ }
+ pre::before, pre::after, pre[class*="language-"]::before, pre[class*="language-"]::after { display: none !important; }
+ code, code[class*="language-"] { 
+    border: none !important;
+    box-shadow: none !important;
+    white-space: pre-wrap !important; 
+    word-break: break-word !important; 
+ }
+ </style>
+ <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-coy.min.css" rel="stylesheet" />
+ <link rel="icon" type="image/png" href="../assets/favicon.png">
+
+ <!-- KaTeX Import for Math Equations -->
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" crossorigin="anonymous">
+ <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js" crossorigin="anonymous"></script>
+ <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body, {delimiters:[{left: '$$', right: '$$', display: true},{left: '$', right: '$', display: false}]});"></script>
+</head>
+<body class="bg-white text-black font-sans antialiased min-h-screen flex flex-col">
+ <!-- Scroll Progress Bar -->
+ <div id="scroll-progress" class="fixed top-0 left-0 h-2 bg-black shadow-md z-[100] transition-all duration-75" style="width: 0%;"></div>
+ <script>
+ window.addEventListener('scroll', () => {
+ const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+ const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+ const scrolled = height > 0 ? (winScroll / height) * 100 : 0;
+ document.getElementById('scroll-progress').style.width = scrolled + '%';
+ });
+ </script>
+
+
+ <!-- Navigation -->
+ <nav class="sticky top-0 z-50 bg-white border-b border-black w-full px-6 py-4">
+ <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+ <a href="../index.html" class="font-serif font-bold text-xl tracking-tight hover:underline block">L. Zheng</a>
+ <div class="flex flex-wrap justify-center gap-6">
+ <a href="../index.html" class="font-mono text-sm text-black hover:underline hover:font-bold transition-all">Home</a>
+ <a href="../projects.html" class="font-mono text-sm text-black hover:underline hover:font-bold transition-all">Projects</a>
+ </div>
+ </div>
+ </nav>
+
+ <!-- Main Container -->
+ <main class="flex-grow max-w-7xl mx-auto w-full px-6 py-12 md:py-16">
+ <div class="mb-12 font-mono text-xs text-slate-500 border-b border-black pb-4">
+ <a href="../projects.html" class="hover:text-black hover:underline">&larr; Projects</a> / Hyperspectral VAE
+ </div>
+
+ <div class="flex flex-col lg:flex-row gap-12 lg:gap-20 items-start">
+ <aside class="hidden lg:block lg:w-64 flex-shrink-0 sticky top-28">
+ <span class="font-mono text-xs font-bold border-b-2 border-black pb-2 mb-4 block w-full">Contents</span>
+ <nav class="flex flex-col space-y-3 font-sans text-sm border-l border-slate-300 pl-4">
+ <a href="#abstract" class="text-slate-500 hover:text-black transition-colors">0. Abstract and Metadata</a>
+ <a href="#results" class="text-slate-500 hover:text-black transition-colors">1. Model Outputs</a>
+ <a href="#architecture" class="text-slate-500 hover:text-black transition-colors">2. Architectural Pipeline</a>
+ <a href="#loss-function" class="text-slate-500 hover:text-black transition-colors">3. Loss Optimization</a>
+ <a href="#fcn-vae" class="text-slate-500 hover:text-black transition-colors">4. Fully Connected VAE</a>
+ </nav>
+ 
+ <!-- Interactive Graph -->
+ <div class="mt-12 w-full h-[250px] border border-black bg-slate-50 flex flex-col shadow-sm relative overflow-hidden">
+ <div class="border-b border-black p-2 bg-white">
+ <h3 class="font-mono text-[8px] font-bold text-center">Interactive Graph</h3>
+ </div>
+ <div id="graph-container" class="flex-grow relative w-full h-full"></div>
+ </div>
+ <!-- Tooltip for Graph -->
+ <div id="tooltip" style="position: fixed; opacity: 0; background-color: white; border: 1px solid black; padding: 4px 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; pointer-events: none; z-index: 100;"></div>
+
+ </aside>
+
+ <article class="flex-grow max-w-3xl article-body">
+ <header class="mb-12" id="abstract">
+ <h1 class="font-serif text-5xl md:text-6xl font-bold tracking-tight leading-tight mb-6">Hyperspectral VAE</h1>
+ <div class="grid grid-cols-2 md:grid-cols-3 gap-4 border-y border-black py-4 mb-8">
+ <div id="telemetry-container" data-project-slug="utat_vae">
+ <span class="font-mono text-[10px] text-slate-500 block mb-1">Status</span>
+ <div id="telemetry-content"><span class="font-mono text-sm text-slate-400">Loading telemetry...</span></div>
+ </div>
+ <div>
+ <span class="font-mono text-[10px] text-slate-500 block mb-1">Tech Stack</span>
+ <span class="font-mono text-sm">PyTorch, TorchVision</span>
+ </div>
+ <div class="col-span-2 md:col-span-1">
+ <span class="font-mono text-[10px] text-slate-500 block mb-1">Repository</span>
+ <span class="font-mono text-sm text-slate-500">Private Repo (UTAT)</span>
+ </div>
+ </div>
+ <p class="font-sans text-xl leading-relaxed text-slate-800 font-bold">
+ Created a Variational Autoencoder for hyperspectral data to generate synthetic data for more training data for UTAT models. The architecture uses a lazy dataset loader so it doesn't need to load in many cropped hyperspectral cubes during the training process. The training process uses  MSE and KL Divergence loss functions to ensure a smooth latent space that can be sampled from.
+ </p>
+ </header>
+ 
+ <h2 id="results" class="font-serif text-3xl font-bold border-b border-black pb-2 scroll-mt-24 mt-4 mb-6">1. Sample Model Outputs from the VAE Model</h2>
+ 
+ <p> Using two separate loss functions allowed the model to optimize for two different things: a smooth latent space (done by the KL divergence loss) and accurate recreations (done by the MSE loss function). This allowed me to use a multi-dimensional Gaussian sampling (mapped by the encoder) to generate synthetic hyperspectral data. If I hadn't used the KL divergence, some of the sampled images would have been very accurate, but because the space was not smooth, no sampling would be able to happen.
+   <br> <br>
+I created the following models, each with their own improvements from the previous one:
+
+ </p>
+
+ <ul>
+   <li> V3 - This is the first VAE that was able to come up with output. This was more to see if I could get something to generate, and it was only able to create 15 squared images (because that's what the training data included). There are also cropping artifacts that can be seen on the side because of how the model was created incorrectly (improper number of outputs) </li>
+   <li> V4 - This got rid of the issue from before with the cropping artifacts. I also used all of the hyperspectral cubes that I had access to (the first one wasonly trained on one hyperspectral cube). I also tuned the MSE and KL divergence loss functions to create images that had a bit more structure, with better sampling methods. (Notice how in V3 sample 4, there is an image that is completely blue, this is caused by the latent space not being completely smooth, or sampled incorrectly). This doesn't show up in the V4 version. </li>
+   <li> Fully Connected Network (FCN) - There were a couple updates for this one. This one allowed me to create images of any size. This is done by using a matrix of noise, and then using the V4 model to go through each block of noise to create an image, which is then blurred with the adjacent images. In the first one, the FCN output is extremely disconnected and it looks like a bunch of small images added together. To fix this, I made something to make the noise matrix have global structure, this resulted in something more cohesive (there looks like there is real structure in the image now). Finally, I used some better smoothing algorithms to more or less get rid of the vertical and horizontal artifacts caused by the borders of the cubes. </li>
+ <ul>
+
+
+
+ <!-- Placeholder Image 1 -->
+ <img src="../assets/images/projects/utat_vae/output_sample_1.webp" alt="Synthetic Hyperspectral Output Sample 1" class="w-full border border-black mb-10 shadow-sm" onerror="this.src='https://placehold.co/800x450/e2e8f0/64748b?text=Output+Sample+1+Placeholder'">
+
+ <!-- Placeholder Image 2 -->
+ <img src="../assets/images/projects/utat_vae/output_sample_2.webp" alt="Synthetic Hyperspectral Output Sample 2" class="w-full border border-black mb-10 shadow-sm" onerror="this.src='https://placehold.co/800x450/e2e8f0/64748b?text=Output+Sample+2+Placeholder'">
+
+ <h2 id="architecture" class="font-serif text-3xl font-bold border-b border-black pb-2 scroll-mt-24 mt-12 mb-6">2. Model Intent and Pipeline</h2>
+
+ <p>The model was created for synthetic data generation to create data to train other UTAT models on. For this reason, there is also the requirement of "randomness" or variability in the model so its not just generating the exact same image every single time it is queried.</p>
+
+ <div class="my-8 border-l-4 border-black bg-slate-50 p-6 relative">
+ <span class="absolute top-0 left-0 bg-black text-white font-mono text-[10px] px-2 py-1 transform -translate-y-1/2 ml-4">Difference between AutoEncoder and Variational AutoEncoder.</span>
+ <p class="font-serif text-l text-black mt-2">
+ Autoencoders (AEs) compress data for later reconstruction. Essentially, it takes in an image as input, in a form that typically takes up less space. Then it uses a decoder later on to recreate the image. AEs are more used to find the embedding of an image, rather than creating synthetic data.  Variational Autoencoders (VAEs) output a probabilistic mean and variance, which allows for continuous sampling (it is the smoothing of the latent space that ensures the continuous sampling actually results in physically possible information).
+ </p>
+ </div>
+
+ <h3 class="font-bold text-lg mt-6 mb-2">Lazy Dataset Loading and Chunking</h3>
+ <p>To prevent out-of-memory (OOM) faults when ingesting hyperspectral imagery, a lazy dataset loader was implemented. It dynamically chunks, rotates, and crops training data into small 15 cubed chunks before feeding it into the encoder.</p>
+ 
+ <h3 class="font-bold text-lg mt-6 mb-2">Preprocessing Methods</h3>
+ <ul class="list-disc pl-5 mb-6">
+ <li><strong>Geometric Augmentation:</strong> The created chunks undergo 90/180/270-degree rotation, this ensures there is variability in the images that the model is trained ons. This is importantly especially for the FCN, where it needs to learn how to create images in all orientations so everything can fit together cleanly.</li>
+ <li><strong>Brilliance Clipping:</strong> The top and bottom brilliance percentiles (e.g., 3rd and 97th percentiles) are stripped from the dataset before normalization (0 to 1). When I trained the model without doing this step, the outputs were always clamped between a small range centered around 0.5. Removing the top and bottom brilliance percentiles allowed the model to output brilliance values that stretch from the top to the bottom of the range.</li>
+ </ul>
+
+ <h3 class="font-bold text-lg mt-6 mb-2">Hardware Efficiency</h3>
+ <p>By using the lazy data loader and training the model in small batches, an expensive GPU is not required for training or inference. The lazy data loader also ensures that the model can be trained on basically any amount of RAM.</p>
+
+ <h3 class="font-bold text-lg mt-6 mb-2">Encoding the Image</h3>
+ <p>The encoder maps the localized hyperspectral chunks to a multi-dimensional Gaussian distribution (the size of this latent vector is set by the user, it is currently set to 64 which is working pretty well).</p>
+
+  <h3 class="font-bold text-lg mt-6 mb-2">Decoding the Image</h3>
+ <p>The decoder takes the 64-dimensional vector and attempts to recreate it as accurately as it can to the original image that was encoded. Depending on how accurate it is, a MSE score is computed. </p>
+
+   <h3 class="font-bold text-lg mt-6 mb-2">Sampling</h3>
+ <p>After the encoder has finished learning, a sampler can take the 64-dimensional vectors, use the mean and the variance (one of the vectors has the mean and the other has the variance), to create a completely new vector. If the KL divergence loss did its job, it should be stable and the generated image should be physically possible. Afterwards, this vector is passed into the decoder where the image is reconstructed, and that is the image! </p>
+
+
+
+
+ <h2 id="loss-function" class="font-serif text-3xl font-bold border-b border-black pb-2 scroll-mt-24 mt-12 mb-6">3. Loss Functions Optimization and some Metric Data</h2>
+
+ <p>Two loss functions were used to ensure the sample space was smooth and the outputs were also accurate.</p>
+
+ <ul class="list-disc pl-5 mb-6">
+ <li><strong>Mean Squared Error (MSE):</strong> Enforces pixel-level accuracy between the reconstructed image and the original hyperspectral chunk.</li>
+ <li><strong>Kullback-Leibler (KL) Divergence:</strong> Acts as a regularization term to force the aggregated posterior distribution (the resulting variance) to match a standard normal distribution. This ensures the latent space remains smooth. Without this constraint, sampling nearby vectors (e.g., $x + 0.01$) could result in a physically impossible image. (this was an issue with version 1) </li>
+ </ul>
+
+ <img src="../assets/images/projects/utat_vae/tsne_plot.webp" alt="Latent Space Visualization / t-SNE Plot" class="w-full border border-black mb-10 shadow-sm">
+
+ <h2 id="fcn-vae" class="font-serif text-3xl font-bold border-b border-black pb-2 scroll-mt-24 mt-12 mb-6">4. VAE</h2>
+<p> This is the sequence of files to run to get the VAE from training to sampling. </p>
+
+ <pre class="mermaid border border-black p-4 bg-slate-50 mb-10 shadow-sm max-h-[400px] overflow-auto cursor-grab">
+flowchart TD
+    A([Step 1: Setup Data]) -->|Place .npy spectral arrays in folder| B(dimension_diagnostics.py)
+    B -->|Optional: Verify spectral dimensions match| C(FCN_VAE.py)
+    C -->|Run FCN training -> outputs fcn_vae_bundle.pth| D(fcn_latent_space_diagnostics.py)
+    D -->|Run analysis -> outputs PCA and GMM plots| E(fcn_latent_space_sampler.py)
+    C -.->|Alternative: Skip straight to generation| E
+    E -->|Run sampler -> outputs fcn_synthetic_samples.pt| F(fcn_latent_space_display.py)
+    F -->|Run visualizer| G([Step 5: View Synthetic Spectra])
+ </pre>
+ </article>
+ </div>
+ </main>
+
+ <footer class="border-t border-black mt-12">
+ <a href="#" class="block w-full bg-white hover:bg-slate-50 transition-colors py-8 group cursor-pointer">
+ <div class="max-w-7xl mx-auto px-6 text-center">
+ <span class="font-mono text-sm font-bold group-hover:underline ">&uarr; Back to Top</span>
+ </div>
+ </a>
+ </footer>
+ <script>
+ localStorage.setItem('visited_utat_vae', 'true');
+ </script>
+
+ <!-- Telemetry Script -->
+ <script>
+ document.addEventListener("DOMContentLoaded", () => {
+ const container = document.getElementById("telemetry-container");
+ if (!container) return;
+ 
+ const slug = container.getAttribute("data-project-slug");
+ 
+ fetch("../assets/data/telemetry.json")
+ .then(response => response.json())
+ .then(data => {
+ const project = data.telemetry && data.telemetry[slug];
+ const content = document.getElementById("telemetry-content");
+ 
+ if (!project) {
+ content.innerHTML = '<span class="font-mono text-sm text-slate-500">Not on TaskTracker</span>';
+ return;
+ }
+ 
+ let colorClass = "text-slate-700";
+ if (project.severity === "success") colorClass = "text-green-700";
+ if (project.severity === "warning") colorClass = "text-amber-700";
+ 
+ content.innerHTML = `
+ <div class="flex flex-col">
+ <div class="whitespace-nowrap">
+ <a href="https://task-tracker-web.fly.dev/?project=${slug}" target="_blank" class="font-mono text-sm font-bold hover:underline ${colorClass}">${project.status_badge} &nearr;</a>
+ <span class="font-mono text-sm text-black ml-1">(${project.tasks_completed}/${project.tasks_total})</span>
+ </div>
+ <div class="font-mono text-[10px] text-black truncate max-w-[200px]" title="${project.active_task}">&gt; ${project.active_task}</div>
+ </div>
+ `;
+ })
+ .catch(err => {
+ const content = document.getElementById("telemetry-content");
+ if (content) content.innerHTML = '<span class="font-mono text-sm text-slate-500">Not on TaskTracker</span>';
+ });
+ });
+ </script>
+
+ <!-- D3.js Graph Logic -->
+ <script src="https://d3js.org/d3.v7.min.js"></script>
+ <script>
+ document.addEventListener("DOMContentLoaded", () => {
+ const container = document.getElementById('graph-container');
+ if (!container) return;
+
+ const telemetryContainer = document.getElementById("telemetry-container");
+ const currentProjectSlug = telemetryContainer ? telemetryContainer.getAttribute("data-project-slug") : "";
+
+ const nodes = [
+ { id: "Projects", url: "../projects.html", isCentral: true }, // Central Node
+ { id: "SmallSat Paper", url: "smallsat_paper.html", visitedKey: "visited_smallsat_paper", slug: "smallsat_paper" },
+ { id: "Hyperspectral VAE", url: "utat_vae.html", visitedKey: "visited_utat_vae", slug: "utat_vae" },
+ { id: "Memory Interface", url: "memory_interface.html", visitedKey: "visited_memory_interface", slug: "memory_interface" },
+ { id: "Wing Optimizer", url: "propeller_optimizer.html", visitedKey: "visited_propeller_optimizer", slug: "propeller_optimizer" },
+ { id: "Timmy and Tommy", url: "timmy_and_tommy.html", visitedKey: "visited_timmy_and_tommy", slug: "timmy_and_tommy" },
+ { id: "Compoxel", url: "compoxel.html", visitedKey: "visited_compoxel", slug: "compoxel" },
+ { id: "BioNERBERT", url: "bionerbert.html", visitedKey: "visited_bionerbert", slug: "bionerbert" },
+ { id: "Macropad", url: "macropad.html", visitedKey: "visited_macropad", slug: "macropad" }
+ ];
+
+ const links = [
+ { source: "Projects", target: "SmallSat Paper" },
+ { source: "Projects", target: "Hyperspectral VAE" },
+ { source: "Projects", target: "Memory Interface" },
+ { source: "Projects", target: "Wing Optimizer" },
+ { source: "Projects", target: "Timmy and Tommy" },
+ { source: "Projects", target: "Compoxel" },
+ { source: "Projects", target: "BioNERBERT" },
+ { source: "Projects", target: "Macropad" }
+ ];
+
+ let width = container.clientWidth;
+ let height = container.clientHeight;
+
+ const svg = d3.select("#graph-container").append("svg")
+ .attr("width", width)
+ .attr("height", height);
+
+ const simulation = d3.forceSimulation(nodes)
+ .force("link", d3.forceLink(links).id(d => d.id).distance(60))
+ .force("charge", d3.forceManyBody().strength(-150))
+ .force("center", d3.forceCenter(width / 2, height / 2))
+ .force("collide", d3.forceCollide().radius(d => d.isCentral ? 25 : 15));
+
+ const link = svg.append("g")
+ .selectAll("line")
+ .data(links)
+ .enter().append("line")
+ .attr("class", "link")
+ .attr("stroke", "#ccc")
+ .attr("stroke-width", 1.5);
+
+ const nodeGroup = svg.append("g")
+ .selectAll("g")
+ .data(nodes)
+ .enter().append("g")
+ .attr("class", "node-group")
+ .style("cursor", "pointer")
+ .call(d3.drag()
+ .on("start", dragstarted)
+ .on("drag", dragged)
+ .on("end", dragended))
+ .on("click", (event, d) => {
+ if (d.url !== "#") {
+ window.location.href = d.url;
+ }
+ })
+ .on("mouseover", (event, d) => {
+ const tooltip = d3.select("#tooltip");
+ tooltip.html(d.id)
+ .style("left", (event.clientX + 10) + "px")
+ .style("top", (event.clientY - 20) + "px")
+ .style("opacity", 1);
+ })
+ .on("mousemove", (event) => {
+ d3.select("#tooltip")
+ .style("left", (event.clientX + 10) + "px")
+ .style("top", (event.clientY - 20) + "px");
+ })
+ .on("mouseout", () => {
+ d3.select("#tooltip").style("opacity", 0);
+ });
+
+ // Active node background highlight (Outer ring)
+ nodeGroup.filter(d => d.slug === currentProjectSlug)
+ .append("circle")
+ .attr("r", 13.5)
+ .attr("fill", "black");
+
+ // Main node circle
+ nodeGroup.append("circle")
+ .attr("r", d => d.isCentral ? 20 : 10)
+ .attr("fill", d => {
+ if (d.isCentral) return "#f1f5f9";
+ if (d.slug === currentProjectSlug) return "black";
+ return localStorage.getItem(d.visitedKey) ? "black" : "white";
+ })
+ .attr("stroke", d => {
+ if (d.isCentral) return "black";
+ if (d.slug === currentProjectSlug) return "white";
+ return "black";
+ })
+ .attr("stroke-width", d => {
+ if (d.isCentral) return 2;
+ if (d.slug === currentProjectSlug) return 3;
+ return 2;
+ });
+
+ // Central node label
+ svg.append("g")
+ .selectAll("text")
+ .data(nodes.filter(d => d.isCentral))
+ .enter().append("text")
+ .text(d => d.id)
+ .attr("text-anchor", "middle")
+ .attr("dy", ".3em")
+ .attr("font-family", "JetBrains Mono")
+ .attr("font-size", "8px")
+ .attr("font-weight", "bold")
+ .attr("fill", "black")
+ .style("pointer-events", "none");
+
+ simulation.on("tick", () => {
+ nodeGroup.attr("transform", d => {
+ d.x = Math.max(20, Math.min(width - 20, d.x));
+ d.y = Math.max(20, Math.min(height - 20, d.y));
+ return `translate(${d.x},${d.y})`;
+ });
+ link.attr("x1", d => d.source.x)
+ .attr("y1", d => d.source.y)
+ .attr("x2", d => d.target.x)
+ .attr("y2", d => d.target.y);
+ svg.selectAll("text")
+ .attr("x", d => d.x)
+ .attr("y", d => d.y);
+ });
+
+ function dragstarted(event, d) {
+ if (!event.active) simulation.alphaTarget(0.3).restart();
+ d.fx = d.x;
+ d.fy = d.y;
+ }
+ function dragged(event, d) {
+ d.fx = event.x;
+ d.fy = event.y;
+ }
+ function dragended(event, d) {
+ if (!event.active) simulation.alphaTarget(0);
+ d.fx = null;
+ d.fy = null;
+ }
+
+ window.addEventListener('resize', () => {
+ width = container.clientWidth;
+ height = container.clientHeight;
+ svg.attr("width", width).attr("height", height);
+ simulation.force("center", d3.forceCenter(width / 2, height / 2));
+ simulation.alpha(0.3).restart();
+ });
+ });
+ </script>
+
+
+ <!-- Mermaid JS -->
+ <script type="module">
+ import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+ mermaid.initialize({ 
+  startOnLoad: true, 
+  theme: 'neutral',
+  flowchart: { useMaxWidth: false },
+  sequence: { useMaxWidth: false }
+  });
+ 
+ // Add drag-to-scroll functionality
+ window.addEventListener('load', () => {
+ setTimeout(() => {
+ document.querySelectorAll('.mermaid').forEach(container => {
+ container.style.cursor = 'grab';
+ let isDown = false;
+ let startX, startY, scrollLeft, scrollTop;
+
+ container.addEventListener('mousedown', (e) => {
+ isDown = true;
+ container.style.cursor = 'grabbing';
+ startX = e.pageX - container.offsetLeft;
+ startY = e.pageY - container.offsetTop;
+ scrollLeft = container.scrollLeft;
+ scrollTop = container.scrollTop;
+ });
+ container.addEventListener('mouseleave', () => {
+ isDown = false;
+ container.style.cursor = 'grab';
+ });
+ container.addEventListener('mouseup', () => {
+ isDown = false;
+ container.style.cursor = 'grab';
+ });
+ container.addEventListener('mousemove', (e) => {
+ if (!isDown) return;
+ e.preventDefault();
+ const x = e.pageX - container.offsetLeft;
+ const y = e.pageY - container.offsetTop;
+ const walkX = (x - startX) * 1.5;
+ const walkY = (y - startY) * 1.5;
+ container.scrollLeft = scrollLeft - walkX;
+ container.scrollTop = scrollTop - walkY;
+ });
+ });
+ }, 500);
+ });
+ </script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timmy and Tommy Cognitive Architecture | Licheng Zheng</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], serif: ['Playfair Display', 'serif'], mono: ['JetBrains Mono', 'monospace'], } } }
+        }
+    </script>
+    <style>
+        :root {
+            color-scheme: light;
+        }
+
+        ::selection {
+            background-color: black;
+            color: white;
+        }
+
+        .article-body p {
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+        }
+
+        .article-body ul {
+            list-style-type: square;
+            margin-left: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .article-body li {
+            margin-bottom: 0.5rem;
+        }
+
+        pre, pre[class*="language-"] { 
+            border-left: 6px solid #fdba74 !important; 
+            box-shadow: none !important; 
+            white-space: pre-wrap !important; 
+            word-break: break-word !important; 
+        }
+        pre::before, pre::after, pre[class*="language-"]::before, pre[class*="language-"]::after { display: none !important; }
+        code, code[class*="language-"] { 
+            border: none !important;
+            box-shadow: none !important;
+            white-space: pre-wrap !important; 
+            word-break: break-word !important; 
+        }
+    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-coy.min.css" rel="stylesheet" />
+    <link rel="icon" type="image/png" href="../assets/favicon.png">
+
+    <!-- KaTeX Import for Math Equations -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" crossorigin="anonymous">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
+        crossorigin="anonymous"
+        onload="renderMathInElement(document.body, {delimiters:[{left: '$$', right: '$$', display: true},{left: '$', right: '$', display: false}]});"></script>
+</head>
+
+<body class="bg-white text-black font-sans antialiased min-h-screen flex flex-col">
+    <!-- Scroll Progress Bar -->
+    <div id="scroll-progress" class="fixed top-0 left-0 h-2 bg-black shadow-md z-[100] transition-all duration-75"
+        style="width: 0%;"></div>
+    <script>
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = height > 0 ? (winScroll / height) * 100 : 0;
+            document.getElementById('scroll-progress').style.width = scrolled + '%';
+        });
+    </script>
+
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-white border-b border-black w-full px-6 py-4">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <a href="../index.html" class="font-serif font-bold text-xl tracking-tight hover:underline block">L.
+                Zheng</a>
+            <div class="flex flex-wrap justify-center gap-6">
+                <a href="../index.html"
+                    class="font-mono text-sm text-black hover:underline hover:font-bold transition-all">Home</a>
+                <a href="../projects.html"
+                    class="font-mono text-sm text-black hover:underline hover:font-bold transition-all">Projects</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl mx-auto w-full px-6 py-12 md:py-16">
+        <div class="mb-12 font-mono text-xs text-slate-500 border-b border-black pb-4">
+            <a href="../projects.html" class="hover:text-black hover:underline">&larr; Projects</a> / Timmy and Tommy
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-12 lg:gap-20 items-start">
+            <aside class="hidden lg:block lg:w-64 flex-shrink-0 sticky top-28">
+                <span class="font-mono text-xs font-bold border-b-2 border-black pb-2 mb-4 block w-full">Contents</span>
+                <nav class="flex flex-col space-y-3 font-sans text-sm border-l border-slate-300 pl-4">
+                    <a href="#abstract" class="text-slate-500 hover:text-black transition-colors">0. Abstract &
+                        Metadata</a>
+                    <a href="#benchmarks" class="text-slate-500 hover:text-black transition-colors">1. Industry
+                        Benchmarks</a>
+                    <a href="#architecture" class="text-slate-500 hover:text-black transition-colors">2. Cognitive RNN
+                        Architecture</a>
+                    <a href="#rag" class="text-slate-500 hover:text-black transition-colors">3. HNSW Vector
+                        Traversal</a>
+                    <a href="#cost" class="text-slate-500 hover:text-black transition-colors">4. Cost Breakdown</a>
+                    <a href="#safeguards" class="text-slate-500 hover:text-black transition-colors">5. Infrastructure &
+                        Safeguards</a>
+                    <a href="#roadmap" class="text-slate-500 hover:text-black transition-colors">6. Future Roadmap</a>
+                </nav>
+
+                <!-- Interactive Graph -->
+                <div
+                    class="mt-12 w-full h-[250px] border border-black bg-slate-50 flex flex-col shadow-sm relative overflow-hidden">
+                    <div class="border-b border-black p-2 bg-white">
+                        <h3 class="font-mono text-[8px] font-bold text-center">Interactive Graph</h3>
+                    </div>
+                    <div id="graph-container" class="flex-grow relative w-full h-full"></div>
+                </div>
+                <!-- Tooltip for Graph -->
+                <div id="tooltip"
+                    style="position: fixed; opacity: 0; background-color: white; border: 1px solid black; padding: 4px 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; pointer-events: none; z-index: 100;">
+                </div>
+
+            </aside>
+
+            <article class="flex-grow max-w-3xl article-body">
+                <header class="mb-12" id="abstract">
+                    <h1 class="font-serif text-5xl md:text-6xl font-bold tracking-tight leading-tight mb-6">Timmy &
+                        Tommy Cognitive Architecture</h1>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 border-y border-black py-4 mb-8">
+                        <div id="telemetry-container" data-project-slug="timmy_and_tommy">
+                            <span class="font-mono text-[10px] text-slate-500 block mb-1">Status</span>
+                            <div id="telemetry-content"><span class="font-mono text-sm text-slate-400">Loading
+                                    telemetry...</span></div>
+                        </div>
+                        <div>
+                            <span class="font-mono text-[10px] text-slate-500 block mb-1">Live</span>
+                            <div class="flex flex-col">
+                                <a href="#" target="_blank"
+                                    class="font-mono text-sm text-red-800/80 font-bold hover:underline">Live App
+                                    &nearr;</a>
+                                <span class="font-mono text-[10px] text-slate-500">(Available Weekdays from 08:00 -
+                                    18:00
+                                    EST)</span>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="font-mono text-[10px] text-slate-500 block mb-1">Tech Stack</span>
+                            <span class="font-mono text-sm">Groq LPU, FastAPI, ChromaDB, QDrantDB, PyTorch</span>
+                        </div>
+                        <div>
+                            <span class="font-mono text-[10px] text-slate-500 block mb-1">Repository</span>
+                            <a href="#" target="_blank" class="font-mono text-sm text-blue-600 hover:underline">View on
+                                GitHub &nearr;</a>
+                        </div>
+                    </div>
+                    <p class="font-sans text-xl leading-relaxed text-slate-800 font-bold">
+                        Timmy and Tommy are retrieval-augmented generation (RAG) assistants which integrate
+                        neural networks (RNNs) for fast and cheap persona classification and emotional state management.
+                        Through this resource management, the system is able to run the QDrant DB graph traversal and
+                        state detection on a resource-constrained Azure B2als v2 virtual machine.
+                    </p>
+                </header>
+
+                <img src="../assets/images/projects/timmy_tommy/frontend.webp" alt="Timmy and Tommy Frontend"
+                    class="w-full border border-black mb-10 shadow-sm">
+
+                <pre
+                    class="mermaid border border-black p-4 bg-slate-50 mb-10 shadow-sm max-h-[400px] overflow-auto cursor-grab">
+sequenceDiagram
+    participant User
+    participant FastAPI Backend
+    participant Tommy (Cognitive RNN)
+    participant Timmy (Emotional RNN)
+    participant QDrantDB
+    participant Groq LPU (LLM)
+
+    User->>FastAPI Backend: Submits Query (the execute command)
+    FastAPI Backend->>QDrantDB: HNSW Graph Traversal
+    FastAPI Backend->>Tommy (Cognitive RNN): Extract user Persona
+    FastAPI Backend->>Timmy (Emotional RNN): Calculate model emotional state (Only Timmy)
+    Tommy (Cognitive RNN)-->>FastAPI Backend: Persona Coordinates (3D PCA)
+    Timmy (Emotional RNN)-->>FastAPI Backend: Sarcasm, Brevity, Pedantry, etc.
+    QDrantDB-->>FastAPI Backend: Top-K Vector Matches and Confidence
+    FastAPI Backend->>Groq LPU (LLM): System Prompt (Facts + Persona)
+    Groq LPU (LLM)-->>User: Streamed Response and Telemetry Data
+ </pre>
+
+                <h2 id="benchmarks"
+                    class="font-serif text-3xl font-bold border-b border-black pb-2 scroll-mt-24 mt-12 mb-6">1. Industry
+                    Performance Benchmarks</h2>
+
+                <p>To validate the RAG methodology, the system is tested against the YLab Bridge Benchmark datasets.
+                </p>
+                <div class="overflow-x-auto my-8 border border-black">
+                    <table class="w-full text-left font-sans text-sm md:text-base border-collapse">
+                        <thead class="bg-slate-100 border-b border-black font-serif">
+                            <tr>
+                                <th class="p-3 border-r border-black">Dataset</th>
+                                <th class="p-3 border-r border-black">Accuracy</th>
+                                <th class="p-3">Methodology / Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-black">
+                                <td class="p-3 border-r border-black font-mono text-sm">MedQA (USMLE)</td>
+                                <td class="p-3 border-r border-black">~68.3% (870/1273)</td>
+                                <td class="p-3">Zero-Shot CoT + Europe PMC Vector Injection. (Base Llama 3.1 8B scores
+                                    ~68.9%).
+                                    <br><br> The decrease in performance is due to the answers being memorized in the
+                                    Base Llama 3.1 8B model, by providing it with dense medical texts, the model's
+                                    behavior is modified, leading to it no longer providing the memorized answer. To
+                                    properly test this, I will be using an early instruct model from before the
+                                    popularization of the MedQA dataset to perform the tests so the real results of the
+                                    RAG architecture can be found.
+                                </td>
+                            </tr>
+                            <tr class="bg-slate-50 border-b border-black">
+                                <td class="p-3 border-r border-black font-mono text-sm">MEDIQA 2019-RQE</td>
+                                <td class="p-3 border-r border-black">100.00% (5/5)</td>
+                                <td class="p-3">Tested on Example dataset; evaluates boolean clinical QA logic.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <p class="text-sm text-slate-500 mb-10"><em>Reference: Wu, J., Gu, B., et al. BRIDGE: benchmarking large
+                        language models for understanding real-world clinical practice texts. Nature Biomedical
+                        Engineering (2026).</em></p>
+
+
+                <h2 id="architecture"
+                    class="font-serif text-3xl font-bold border-b border-black pb-2 scroll-mt-24 mt-12 mb-6">2.
+                    Cognitive RNN and FastAPI Architecture</h2>
+
+                <p>User queries are handled by a FastAPI backend that orchestrates the execution flow before reaching
+                    the LLM. Instead of burning token bandwidth and latency on a larger LLM to classify user intent, the
+                    backend routes the query through two discrete Recurrent Neural Networks (100 KB footprint each) that
+                    execute locally on the shared CPU server.</p>
+
+                <div class="my-8 border-l-4 border-black bg-slate-50 p-6 relative">
+                    <span
+                        class="absolute top-0 left-0 bg-black text-white font-mono text-[10px] px-2 py-1 transform -translate-y-1/2 ml-4">Reason
+                        for RNN rather than a Transformer</span>
+                    <p class="font-serif text-xl text-black mt-2">
+                        Typically, emotional states and user personas are calculated using transformers (which
+                        pick out the relevant text from the chat history to determine these items) and weaker models,
+                        which output the information before it is injected into a stronger model's prompt for the real
+                        response. RNNs are no longer used because they cannot capture as much complexity as
+                        the two methods above.
+                        However, because I am compute constrained (so I cannot run a transformer) and API rate limited
+                        (so I cannot pass it into a weaker model). For this reason, I used custom RNNs, which are 100 KB
+                        each, run practically instantly on the virtual machine, and were freely available.
+                    </p>
+                </div>
+
+                <ul class="list-disc pl-5 mb-6">
+                    <li><strong>Backend Routing:</strong> The FastAPI server first queries the QDrant vector database
+                        using the user's input. Simultaneously, it passes the input to both the Tommy and Timmy RNNs to
+                        extract persona coordinates and calculate the simulated emotional state.</li>
+                    <li><strong>User Persona RNN (Tommy):</strong> Maps the user's semantic intent into a 64-dimensional
+                        latent space. Principal Component Analysis (PCA) reduces this to a 3D coordinate representing
+                        the user profile (this is what gets displayed on the website). The nearest pre-calculated
+                        persona vector is assigned, determining what is written in the response.</li>
+                    <li><strong>Emotional State RNN (Timmy):</strong> The RNN updates the current "mood" as the
+                        conversation progresses. Depending on the calculated emotional state, specific response
+                        guidelines are injected into the prompt, leading to different responses. Something important to
+                        note is that the more strongly instructed models (including the ones that are freely available
+                        on Groq
+                        at the moment unfortunately), do not respond as well to these prompt injections for certain
+                        behavior. For this reason, the effect of the emotions is not as pronounced as it was with the
+                        uninstructed base
+                        Llama 3.1 8B that was used previously. </li>
+                    <li><strong>Prompt Injection:</strong> The FastAPI backend combines the retrieved QDrant DB facts,
+                        the user persona context, and the emotional state constraints into a dense system prompt, which
+                        is finally sent to the Groq LPU for generation.</li>
+                </ul>
+
+                <h3 class="font-bold text-lg mt-6 mb-2">Training Methodology and Data Generation</h3>
+                <p>To prevent me from needing to spend a long time writing scripts for particular personas, how the
+                    different personas speak was emulated by Chat GPT 4-mini. Although this did result in unnatural
+                    behavior (the results are what the model thinks a medical expert would sound like instead of what
+                    they actually sound like), it was good enough for this projects purposes.
+                    <br>
+                    After these scripts were generated, I passed them through a PyTorch feature extractor
+                    (S-PubMedBert-MS-MARCO) to generate 64-dimensional vectors of each persona. Which are then used to
+                    calculate the user persona vector. This then gets fed into the RNN to update the state of the user.
+
+                    <br> <br>
+                    Here is the process that I used for creating this:
+                </p>
+                <ol class="list-decimal pl-5 mb-6">
+                    <li>The OpenAI API was used to simulate conversational datasets for specific personas (e.g., medical
+                        professional vs. mathematician).</li>
+                    <li>The dataset was passed through an embedder to create latent representations.</li>
+                    <li>Triplet Loss was applied to cluster similar conversational vectors (e.g., medical) while pushing
+                        disparate vectors away (e.g. mathematician).</li>
+                    <li>At runtime, user inputs are mapped into this trained latent space; the RNN takes these vectors
+                        and generates a user persona. Depending on its output, different prompt injections are triggered
+                        resulting in tailored responses.</li>
+                </ol>
+
+                <h2 id="rag" class="font-serif text-3xl font-bold border-b border-black pb-2 scroll-mt-24 mt-12 mb-6">3.
+                    HNSW Vector Traversal</h2>
+
+                <p>The context and research paper injection comes from the in-memory QDrant database. It is stored on
+                    the virtual machine to prevent external storage costs.
+
+                    The search algorithm relies on a Hierarchical Navigable Small World (HNSW) graph, which reduces
+                    query complexity from $O(n)$ to $O(\log n)$. </p>
+
+                <img src="../assets/images/projects/timmy_tommy/pca_plot.webp" alt="3D PCA Persona Plot"
+                    class="w-full border border-black mb-10 shadow-sm">
+
+                <h2 id="metrics"
+                    class="font-serif text-3xl font-bold border-b border-black pb-2 scroll-mt-24 mt-12 mb-6">API
+                    Information</h2>
+
+                <p>With every response Groq API also returns the following metrics on the speed of response generation.
+                </p>
+
+                <table class="w-full text-sm text-left font-sans border-collapse mb-8">
+                    <thead>
+                        <tr>
+                            <th class="border border-black bg-slate-100 p-2 font-mono text-xs ">Metric</th>
+                            <th class="border border-black bg-slate-100 p-2 font-mono text-xs ">Observed Value
+                            </th>
+                            <th class="border border-black bg-slate-100 p-2 font-mono text-xs ">Implication
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="border border-slate-300 p-2">Time To First Token (TTFT)</td>
+                            <td class="border border-slate-300 p-2"><code>0.61 s</code></td>
+                            <td class="border border-slate-300 p-2">Includes local HNSW traversal + API network latency
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="border border-slate-300 p-2">Generation Throughput</td>
+                            <td class="border border-slate-300 p-2"><code>441.5 T/s</code></td>
+                            <td class="border border-slate-300 p-2">Raw Groq LPU tensor output velocity</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-slate-300 p-2">Prompt Processing Speed</td>
+                            <td class="border border-slate-300 p-2"><code>17,621 T/s</code></td>
+                            <td class="border border-slate-300 p-2">Speed at which RAG context is digested</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-slate-300 p-2">DB Fetch Latency</td>
+                            <td class="border border-slate-300 p-2"><code>108 ms</code></td>
+                            <td class="border border-slate-300 p-2">Time to return top-k matches from QDrantDB
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2 id="cost" class="font-serif text-3xl font-bold border-b border-black pb-2 scroll-mt-24 mt-12 mb-6">
+                    4. Cost Breakdown</h2>
+
+                <p>More detailed cost information can be found on the Github Repository linked at the top of this page.
+                </p>
+                <table class="w-full text-sm text-left font-sans border-collapse mb-8 mt-8">
+                    <thead>
+                        <tr>
+                            <th class="border border-black bg-slate-100 p-2 font-mono text-xs ">Component</th>
+                            <th class="border border-black bg-slate-100 p-2 font-mono text-xs ">Cost</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="border border-slate-300 p-2">
+                                <strong>Data Acquisition (Europe PMC and Wikipedia)</strong><br>
+                                <span class="text-xs text-slate-500">Scraped locally via CPU.</span>
+                            </td>
+                            <td class="border border-slate-300 p-2">$0.00</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-slate-300 p-2">
+                                <strong>Model Training and Generation</strong><br>
+                                <span class="text-xs text-slate-500">RNNs (\$0.00, trained locally), NER Model ($5.78,
+                                    see also BioNERBERT-CRF project), Synth Persona Gen
+                                    ($6.47), Timmy Personality Gen ($12.89, multiple days of ChatGPT API quota),
+                                    Embedding Calc ($0.00, freely provided model on Hugging Face).</span>
+                            </td>
+                            <td class="border border-slate-300 p-2">$19.36</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-slate-300 p-2">
+                                <strong>Vector Storage (QDrantDB)</strong><br>
+                                <span class="text-xs text-slate-500">Stored locally in-memory (~300 MB).</span>
+                            </td>
+                            <td class="border border-slate-300 p-2">$0.00</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-slate-300 p-2">
+                                <strong>VM Hosting (Microsoft Azure)</strong><br>
+                                <span class="text-xs text-slate-500">B2al-v2 server. Automated shutdown outside 9AM-6PM
+                                    weekdays saves ~40% costs.</span>
+                            </td>
+                            <td class="border border-slate-300 p-2">$16.20 / mo</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-slate-300 p-2">
+                                <strong>Live LLM Inference (Groq LPU)</strong><br>
+                                <span class="text-xs text-slate-500">Utilizes Qwen3-32b, Llama-4-Scout, and
+                                    Llama-3.3-70b via API.</span>
+                            </td>
+                            <td class="border border-slate-300 p-2">Free Tier</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2 id="safeguards"
+                    class="font-serif text-3xl font-bold border-b border-black pb-2 scroll-mt-24 mt-12 mb-6">5.
+                    Safeguards</h2>
+                <ul class="list-disc pl-5 mb-6">
+                    <li><strong>Rate-Limiting (SlowAPI):</strong> Caps requests at 15/minute to prevent a denial of
+                        service attack preventing people from using it because of Groq API limits. </li>
+                    <li><strong>Virtual Memory (Swap):</strong> The PyTorch models initially caused Out-Of-Memory
+                        crashes on the 2GB RAM VM. To allow the program to run without needing to upgrade the virtual
+                        machine, I used some of the SSD as RAM, which is significantly slower but ensures it doesn't
+                        crash. (I did upgrade the VM afterwards when I switched to Microsoft Azure though!)</li>
+                </ul>
+
+                <h2 id="roadmap"
+                    class="font-serif text-3xl font-bold border-b border-black pb-2 scroll-mt-24 mt-12 mb-6">6. Future
+                    Roadmap</h2>
+                <ul class="list-disc pl-5 mb-6">
+                    <li><strong>Multi-Shot Prompting:</strong> Using a weaker model to generate more prompts to search
+                        in the vector database for to create a more complete response. For example, instead of just
+                        providing drug information when the user asks about a drug, the multi-shot prompting would also
+                        find information on the effects of the drug and other details. This is already partially
+                        implemented (and deployed), but I want to make a better stop criteria for when it stops
+                        searching for new queries. </li>
+                    <li><strong>CPU-Based Reranking:</strong> Implementing a cross-encoder (ms-marco-MiniLM) to re-score
+                        QDrantDB retrievals to maximize the relevance of the sources. This is already implemented and
+                        deployed, you can also see the labels of the cross-encoder when you look at the source box below
+                        every response. </li>
+                    <li><strong>Safety Layer:</strong> A new RNN to definitively reject queries unrelated to the
+                        retrieved domain context. This isn't really to prevent anyone from getting any secret
+                        information, but more so I can experiment with implemnting it.</li>
+                    <li><strong>Chat Authority Layer:</strong> Granting the Emotional RNN the autonomous ability to
+                        terminate the session if the simulated "annoyance" reaches critical thresholds. I think if
+                        you're using Timmy instead of Tommy, you're in it for the emotional layer, and I think emotions
+                        without authority make it feel very fake so that is something I want to work on. </li>
+                </ul>
+            </article>
+        </div>
+    </main>
+
+    <footer class="border-t border-black mt-12">
+        <a href="#" class="block w-full bg-white hover:bg-slate-50 transition-colors py-8 group cursor-pointer">
+            <div class="max-w-7xl mx-auto px-6 text-center">
+                <span class="font-mono text-sm font-bold group-hover:underline ">&uarr; Back to Top</span>
+            </div>
+        </a>
+    </footer>
+    <script>
+        localStorage.setItem('visited_timmy_and_tommy', 'true');
+    </script>
+
+    <!-- Telemetry Script -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const container = document.getElementById("telemetry-container");
+            if (!container) return;
+
+            const slug = container.getAttribute("data-project-slug");
+
+            fetch("../assets/data/telemetry.json")
+                .then(response => response.json())
+                .then(data => {
+                    const project = data.telemetry && data.telemetry[slug];
+                    const content = document.getElementById("telemetry-content");
+
+                    if (!project) {
+                        content.innerHTML = '<span class="font-mono text-sm text-slate-500">Not on TaskTracker</span>';
+                        return;
+                    }
+
+                    let colorClass = "text-slate-700";
+                    if (project.severity === "success") colorClass = "text-green-700";
+                    if (project.severity === "warning") colorClass = "text-amber-700";
+
+                    content.innerHTML = `
+ <div class="flex flex-col">
+ <div class="whitespace-nowrap">
+ <a href="https://task-tracker-web.fly.dev/?project=${slug}" target="_blank" class="font-mono text-sm font-bold hover:underline ${colorClass}">${project.status_badge} &nearr;</a>
+ <span class="font-mono text-sm text-black ml-1">(${project.tasks_completed}/${project.tasks_total})</span>
+ </div>
+ <div class="font-mono text-[10px] text-black truncate max-w-[200px]" title="${project.active_task}">&gt; ${project.active_task}</div>
+ </div>
+ `;
+                })
+                .catch(err => {
+                    const content = document.getElementById("telemetry-content");
+                    if (content) content.innerHTML = '<span class="font-mono text-sm text-slate-500">Not on TaskTracker</span>';
+                });
+        });
+    </script>
+
+    <!-- D3.js Graph Logic -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const container = document.getElementById('graph-container');
+            if (!container) return;
+
+            const telemetryContainer = document.getElementById("telemetry-container");
+            const currentProjectSlug = telemetryContainer ? telemetryContainer.getAttribute("data-project-slug") : "";
+
+            const nodes = [
+                { id: "Projects", url: "../projects.html", isCentral: true }, // Central Node
+                { id: "SmallSat Paper", url: "smallsat_paper.html", visitedKey: "visited_smallsat_paper", slug: "smallsat_paper" },
+                { id: "Hyperspectral VAE", url: "utat_vae.html", visitedKey: "visited_utat_vae", slug: "utat_vae" },
+                { id: "Memory Interface", url: "memory_interface.html", visitedKey: "visited_memory_interface", slug: "memory_interface" },
+                { id: "Wing Optimizer", url: "propeller_optimizer.html", visitedKey: "visited_propeller_optimizer", slug: "propeller_optimizer" },
+                { id: "Timmy and Tommy", url: "timmy_and_tommy.html", visitedKey: "visited_timmy_and_tommy", slug: "timmy_and_tommy" },
+                { id: "Compoxel", url: "compoxel.html", visitedKey: "visited_compoxel", slug: "compoxel" },
+                { id: "BioNERBERT", url: "bionerbert.html", visitedKey: "visited_bionerbert", slug: "bionerbert" },
+                { id: "Macropad", url: "macropad.html", visitedKey: "visited_macropad", slug: "macropad" }
+            ];
+
+            const links = [
+                { source: "Projects", target: "SmallSat Paper" },
+                { source: "Projects", target: "Hyperspectral VAE" },
+                { source: "Projects", target: "Memory Interface" },
+                { source: "Projects", target: "Wing Optimizer" },
+                { source: "Projects", target: "Timmy and Tommy" },
+                { source: "Projects", target: "Compoxel" },
+                { source: "Projects", target: "BioNERBERT" },
+                { source: "Projects", target: "Macropad" }
+            ];
+
+            let width = container.clientWidth;
+            let height = container.clientHeight;
+
+            const svg = d3.select("#graph-container").append("svg")
+                .attr("width", width)
+                .attr("height", height);
+
+            const simulation = d3.forceSimulation(nodes)
+                .force("link", d3.forceLink(links).id(d => d.id).distance(60))
+                .force("charge", d3.forceManyBody().strength(-150))
+                .force("center", d3.forceCenter(width / 2, height / 2))
+                .force("collide", d3.forceCollide().radius(d => d.isCentral ? 25 : 15));
+
+            const link = svg.append("g")
+                .selectAll("line")
+                .data(links)
+                .enter().append("line")
+                .attr("class", "link")
+                .attr("stroke", "#ccc")
+                .attr("stroke-width", 1.5);
+
+            const nodeGroup = svg.append("g")
+                .selectAll("g")
+                .data(nodes)
+                .enter().append("g")
+                .attr("class", "node-group")
+                .style("cursor", "pointer")
+                .call(d3.drag()
+                    .on("start", dragstarted)
+                    .on("drag", dragged)
+                    .on("end", dragended))
+                .on("click", (event, d) => {
+                    if (d.url !== "#") {
+                        window.location.href = d.url;
+                    }
+                })
+                .on("mouseover", (event, d) => {
+                    const tooltip = d3.select("#tooltip");
+                    tooltip.html(d.id)
+                        .style("left", (event.clientX + 10) + "px")
+                        .style("top", (event.clientY - 20) + "px")
+                        .style("opacity", 1);
+                })
+                .on("mousemove", (event) => {
+                    d3.select("#tooltip")
+                        .style("left", (event.clientX + 10) + "px")
+                        .style("top", (event.clientY - 20) + "px");
+                })
+                .on("mouseout", () => {
+                    d3.select("#tooltip").style("opacity", 0);
+                });
+
+            // Active node background highlight (Outer ring)
+            nodeGroup.filter(d => d.slug === currentProjectSlug)
+                .append("circle")
+                .attr("r", 13.5)
+                .attr("fill", "black");
+
+            // Main node circle
+            nodeGroup.append("circle")
+                .attr("r", d => d.isCentral ? 20 : 10)
+                .attr("fill", d => {
+                    if (d.isCentral) return "#f1f5f9";
+                    if (d.slug === currentProjectSlug) return "black";
+                    return localStorage.getItem(d.visitedKey) ? "black" : "white";
+                })
+                .attr("stroke", d => {
+                    if (d.isCentral) return "black";
+                    if (d.slug === currentProjectSlug) return "white";
+                    return "black";
+                })
+                .attr("stroke-width", d => {
+                    if (d.isCentral) return 2;
+                    if (d.slug === currentProjectSlug) return 3;
+                    return 2;
+                });
+
+            // Central node label
+            svg.append("g")
+                .selectAll("text")
+                .data(nodes.filter(d => d.isCentral))
+                .enter().append("text")
+                .text(d => d.id)
+                .attr("text-anchor", "middle")
+                .attr("dy", ".3em")
+                .attr("font-family", "JetBrains Mono")
+                .attr("font-size", "8px")
+                .attr("font-weight", "bold")
+                .attr("fill", "black")
+                .style("pointer-events", "none");
+
+            simulation.on("tick", () => {
+                nodeGroup.attr("transform", d => {
+                    d.x = Math.max(20, Math.min(width - 20, d.x));
+                    d.y = Math.max(20, Math.min(height - 20, d.y));
+                    return `translate(${d.x},${d.y})`;
+                });
+                link.attr("x1", d => d.source.x)
+                    .attr("y1", d => d.source.y)
+                    .attr("x2", d => d.target.x)
+                    .attr("y2", d => d.target.y);
+                svg.selectAll("text")
+                    .attr("x", d => d.x)
+                    .attr("y", d => d.y);
+            });
+
+            function dragstarted(event, d) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
+            }
+            function dragged(event, d) {
+                d.fx = event.x;
+                d.fy = event.y;
+            }
+            function dragended(event, d) {
+                if (!event.active) simulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+            }
+
+            window.addEventListener('resize', () => {
+                width = container.clientWidth;
+                height = container.clientHeight;
+                svg.attr("width", width).attr("height", height);
+                simulation.force("center", d3.forceCenter(width / 2, height / 2));
+                simulation.alpha(0.3).restart();
+            });
+        });
+    </script>
+
+
+    <!-- Mermaid JS -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'neutral',
+            flowchart: { useMaxWidth: false },
+            sequence: { useMaxWidth: false }
+        });
+
+        // Add drag-to-scroll functionality
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.querySelectorAll('.mermaid').forEach(container => {
+                    container.style.cursor = 'grab';
+                    let isDown = false;
+                    let startX, startY, scrollLeft, scrollTop;
+
+                    container.addEventListener('mousedown', (e) => {
+                        isDown = true;
+                        container.style.cursor = 'grabbing';
+                        startX = e.pageX - container.offsetLeft;
+                        startY = e.pageY - container.offsetTop;
+                        scrollLeft = container.scrollLeft;
+                        scrollTop = container.scrollTop;
+                    });
+                    container.addEventListener('mouseleave', () => {
+                        isDown = false;
+                        container.style.cursor = 'grab';
+                    });
+                    container.addEventListener('mouseup', () => {
+                        isDown = false;
+                        container.style.cursor = 'grab';
+                    });
+                    container.addEventListener('mousemove', (e) => {
+                        if (!isDown) return;
+                        e.preventDefault();
+                        const x = e.pageX - container.offsetLeft;
+                        const y = e.pageY - container.offsetTop;
+                        const walkX = (x - startX) * 1.5;
+                        const walkY = (y - startY) * 1.5;
+                        container.scrollLeft = scrollLeft - walkX;
+                        container.scrollTop = scrollTop - walkY;
+                    });
+                });
+            }, 500);
+        });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
+</body>
+
+
+</html>

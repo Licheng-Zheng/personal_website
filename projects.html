@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Licheng Zheng | Projects</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Include D3.js -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            color-scheme: light;
+        }
+
+        ::selection {
+            background-color: black;
+            color: white;
+        }
+
+        /* D3 Graph Styles */
+        .node {
+            cursor: pointer;
+            transition: stroke 0.2s, stroke-width 0.2s, r 0.2s;
+        }
+
+        .node:hover {
+            stroke: #000;
+            stroke-width: 4px;
+        }
+
+        .link {
+            stroke: #94a3b8;
+            /* slate-400 */
+            stroke-opacity: 0.6;
+        }
+
+        /* Tooltip */
+        #tooltip {
+            position: absolute;
+            background: white;
+            border: 2px solid black;
+            padding: 6px 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.15s ease-in-out;
+            z-index: 100;
+        }
+    </style>
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+</head>
+
+<body class="bg-white text-black font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-white border-b border-black w-full px-6 py-4">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <a href="index.html" class="font-serif font-bold text-xl tracking-tight hover:underline block">L. Zheng</a>
+            <div class="flex flex-wrap justify-center gap-6">
+                <a href="index.html"
+                    class="font-mono text-sm text-black hover:underline hover:font-bold transition-all">Home</a>
+                <a href="projects.html"
+                    class="font-mono text-sm text-black hover:underline hover:font-bold transition-all underline font-bold">Projects</a>
+                <!-- Future Migration:
+ <a href="ml_compute.html" class="font-mono text-sm text-black hover:underline hover:font-bold transition-all">ML and Compute</a>
+ <a href="complex_systems.html" class="font-mono text-sm text-black hover:underline hover:font-bold transition-all">Systems and Hardware</a>
+ <a href="hardware_misc.html" class="font-mono text-sm text-black hover:underline hover:font-bold transition-all">Hardware and Misc</a>
+ -->
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main
+        class="flex-grow max-w-7xl mx-auto w-full px-6 py-12 md:py-16 grid grid-cols-1 lg:grid-cols-12 gap-12 relative">
+
+        <!-- Left Column: Projects Overview -->
+        <div class="lg:col-span-8 flex flex-col">
+
+            <!-- Page Header -->
+            <header class="mb-12">
+                <h1 class="font-serif text-5xl md:text-6xl font-bold tracking-tight mb-4">
+                    Projects
+                </h1>
+                <p class="font-mono text-sm text-slate-600 border-l-2 border-black pl-3">
+                    Recent works which include low-level CUDA simulations and hardware builds.
+                </p>
+            </header>
+
+            <!-- Project Index Grid -->
+            <section class="grid grid-cols-1 sm:grid-cols-2 gap-6 pb-12">
+
+                <!-- Card: Compoxel -->
+                <a href="project_pages/compoxel.html"
+                    class="group flex flex-col h-full border border-black bg-white hover:bg-slate-50 hover:shadow-[2px_2px_0px_0px_#e2e8f0] hover:-translate-x-[2px] hover:-translate-y-[2px] transition-all duration-75">
+                    <div
+                        class="aspect-video border-b border-black bg-slate-100 flex items-center justify-center p-2 relative overflow-hidden">
+                        <img src="assets/images/thumbnails/compoxel_wide.webp" alt="Project Thumbnail"
+                            class="absolute inset-0 w-full h-full object-cover">
+                    </div>
+                    <div class="p-4 flex flex-col flex-grow">
+                        <h3 class="font-serif font-bold text-lg mb-2 group-hover:underline decoration-2">Compoxel N-Body
+                        </h3>
+                        <p class="font-sans text-xs text-slate-700 leading-relaxed">Massive-scale TreePM N-Body gravity
+                            simulation created in CUDA to prevent cache thrashing during high-density computation</p>
+                    </div>
+                </a>
+
+                <!-- Card: Timmy and Tommy -->
+                <div
+                    class="group flex flex-col h-full border border-black bg-white hover:bg-slate-50 hover:shadow-[2px_2px_0px_0px_#e2e8f0] hover:-translate-x-[2px] hover:-translate-y-[2px] transition-all duration-75 relative">
+                    <a href="project_pages/timmy_and_tommy.html" class="absolute inset-0 z-10"
+                        aria-label="View Timmy and Tommy project page"></a>
+                    <div
+                        class="aspect-video border-b border-black bg-slate-100 flex items-center justify-center p-2 relative overflow-hidden">
+                        <img src="assets/images/thumbnails/timmy_wide.webp" alt="Project Thumbnail"
+                            class="absolute inset-0 w-full h-full object-cover">
+                    </div>
+                    <div class="p-4 flex flex-col flex-grow">
+                        <h3 class="font-serif font-bold text-lg mb-2 group-hover:underline decoration-2">Timmy and Tommy
+                        </h3>
+                        <p class="font-sans text-xs text-slate-700 leading-relaxed mb-4">Deployed RAG pipeline on
+                            Microsoft Azure web services using QDrant Database for fast retrieval with custom Recurrent
+                            Neural Networks for personality and user profile layers.</p>
+                        <div class="mt-auto flex items-center gap-2 font-mono text-[10px] relative z-20">
+                            <a href="#" target="_blank"
+                                class="text-red-800/80 underline decoration-red-800/50 font-bold hover:text-red-900">Live
+                                App &rarr;</a>
+                            <span class="text-slate-500">(Weekdays 08:00 - 18:00)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card: SmallSat Paper -->
+                <a href="project_pages/smallsat_paper.html"
+                    class="group flex flex-col h-full border border-black bg-white hover:bg-slate-50 hover:shadow-[2px_2px_0px_0px_#e2e8f0] hover:-translate-x-[2px] hover:-translate-y-[2px] transition-all duration-75">
+                    <div
+                        class="aspect-video border-b border-black bg-slate-100 flex items-center justify-center p-2 relative overflow-hidden">
+                        <img src="assets/images/thumbnails/smallsat_wide.webp" alt="Project Thumbnail"
+                            class="absolute inset-0 w-full h-full object-cover">
+                    </div>
+                    <div class="p-4 flex flex-col flex-grow">
+                        <h3 class="font-serif font-bold text-lg mb-2 group-hover:underline decoration-2">SmallSat
+                            Conference Paper (UTAT)</h3>
+                        <p class="font-sans text-xs text-slate-700 leading-relaxed">Metadata-Conditioned Dark-Frame
+                            Modelling and HSDR-ScanFusion Denoising.</p>
+                    </div>
+                </a>
+
+                <!-- Card: Memory Interface -->
+                <a href="project_pages/memory_interface.html"
+                    class="group flex flex-col h-full border border-black bg-white hover:bg-slate-50 hover:shadow-[2px_2px_0px_0px_#e2e8f0] hover:-translate-x-[2px] hover:-translate-y-[2px] transition-all duration-75">
+                    <div
+                        class="aspect-video border-b border-black bg-slate-100 flex items-center justify-center p-2 relative overflow-hidden">
+                        <img src="assets/images/thumbnails/memory_wide.webp" alt="Project Thumbnail"
+                            class="absolute inset-0 w-full h-full object-cover">
+                    </div>
+                    <div class="p-4 flex flex-col flex-grow">
+                        <h3 class="font-serif font-bold text-lg mb-2 group-hover:underline decoration-2">Memory
+                            Interface</h3>
+                        <p class="font-sans text-xs text-slate-700 leading-relaxed">Pytorch memory interface layer which
+                            greatly reduces memory fragmentation when testing large language models.</p>
+                    </div>
+                </a>
+
+                <!-- Card: UTAT VAE -->
+                <a href="project_pages/utat_vae.html"
+                    class="group flex flex-col h-full border border-black bg-white hover:bg-slate-50 hover:shadow-[2px_2px_0px_0px_#e2e8f0] hover:-translate-x-[2px] hover:-translate-y-[2px] transition-all duration-75">
+                    <div
+                        class="aspect-video border-b border-black bg-slate-100 flex items-center justify-center p-2 relative overflow-hidden">
+                        <img src="assets/images/thumbnails/vae_wide.webp" alt="Project Thumbnail"
+                            class="absolute inset-0 w-full h-full object-cover">
+                    </div>
+                    <div class="p-4 flex flex-col flex-grow">
+                        <h3 class="font-serif font-bold text-lg mb-2 group-hover:underline decoration-2">Hyperspectral
+                            VAE (UTAT)</h3>
+                        <p class="font-sans text-xs text-slate-700 leading-relaxed">Trained and evaluated multiple
+                            encoder and decoder architectures to generate hyperspectral data from a learned latent
+                            space.</p>
+                    </div>
+                </a>
+
+                <!-- Card: BioNERBERT -->
+                <div
+                    class="group flex flex-col h-full border border-black bg-white hover:bg-slate-50 hover:shadow-[2px_2px_0px_0px_#e2e8f0] hover:-translate-x-[2px] hover:-translate-y-[2px] transition-all duration-75 relative">
+                    <a href="project_pages/bionerbert.html" class="absolute inset-0 z-10"
+                        aria-label="View BioNERBERT project page"></a>
+                    <div
+                        class="aspect-video border-b border-black bg-slate-100 flex items-center justify-center p-2 relative overflow-hidden">
+                        <img src="assets/images/thumbnails/bionerbert_wide.webp" alt="Project Thumbnail"
+                            class="absolute inset-0 w-full h-full object-cover">
+                    </div>
+                    <div class="p-4 flex flex-col flex-grow">
+                        <h3 class="font-serif font-bold text-lg mb-2 group-hover:underline decoration-2">BioNERBERT with
+                            Custom CRF</h3>
+                        <p class="font-sans text-xs text-slate-700 leading-relaxed mb-4">Deployed a biomedical
+                            Named Entity Recognition (NER) model featuring custom entities and a Conditional Random
+                            Fields (CRF) Layer</p>
+                        <div class="mt-auto flex items-center gap-2 font-mono text-[10px] relative z-20">
+                            <a href="http://ner.lichengzheng.me/" target="_blank"
+                                class="text-red-800/80 underline decoration-red-800/50 font-bold hover:text-red-900">Live
+                                App &rarr;</a>
+                            <span class="text-slate-500">(Weekdays 08:00 - 18:00)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card: Propeller Optimizer -->
+                <a href="project_pages/propeller_optimizer.html"
+                    class="group flex flex-col h-full border border-black bg-white hover:bg-slate-50 hover:shadow-[2px_2px_0px_0px_#e2e8f0] hover:-translate-x-[2px] hover:-translate-y-[2px] transition-all duration-75">
+                    <div
+                        class="aspect-video border-b border-black bg-slate-100 flex items-center justify-center p-2 relative overflow-hidden">
+                        <img src="assets/images/thumbnails/propeller_wide.webp" alt="Project Thumbnail"
+                            class="absolute inset-0 w-full h-full object-cover">
+                    </div>
+                    <div class="p-4 flex flex-col flex-grow">
+                        <h3 class="font-serif font-bold text-lg mb-2 group-hover:underline decoration-2">Airfoil
+                            Optimizer</h3>
+                        <p class="font-sans text-xs text-slate-700 leading-relaxed">Created a parallelizable genetic
+                            algorithm which optimizes an airfoil for specific user-provided conditions.</p>
+                    </div>
+                </a>
+
+                <!-- Card: Custom Macropad -->
+                <a href="project_pages/macropad.html"
+                    class="group flex flex-col h-full border border-black bg-white hover:bg-slate-50 hover:shadow-[2px_2px_0px_0px_#e2e8f0] hover:-translate-x-[2px] hover:-translate-y-[2px] transition-all duration-75">
+                    <div
+                        class="aspect-video border-b border-black bg-slate-100 flex items-center justify-center p-2 relative overflow-hidden">
+                        <img src="assets/images/thumbnails/macropad_wide.webp" alt="Project Thumbnail"
+                            class="absolute inset-0 w-full h-full object-cover">
+                    </div>
+                    <div class="p-4 flex flex-col flex-grow">
+                        <h3 class="font-serif font-bold text-lg mb-2 group-hover:underline decoration-2">Custom Macropad
+                        </h3>
+                        <p class="font-sans text-xs text-slate-700 leading-relaxed">Modelled and built a highly
+                            programmable custom macropad with a joystick and screen for additional input methods and
+                            improved user experience. </p>
+                    </div>
+                </a>
+
+            </section>
+        </div>
+
+        <!-- Right Column: Interactive D3 Graph -->
+        <aside class="hidden lg:block lg:col-span-4 relative">
+            <div class="sticky top-24 w-full h-[600px] border border-black bg-slate-50 flex flex-col shadow-sm">
+                <div class="border-b border-black p-3 bg-white">
+                    <h3 class="font-mono text-[10px] font-bold text-center">Project Graph
+                    </h3>
+                </div>
+                <!-- Graph Container -->
+                <div id="graph-container" class="flex-grow relative w-full h-full overflow-hidden"></div>
+            </div>
+        </aside>
+
+    </main>
+
+    <!-- Tooltip moved to body for correct absolute positioning -->
+    <div id="tooltip">Node Label</div>
+
+    <!-- Footer -->
+    <footer class="border-t border-black bg-white py-6">
+        <div class="max-w-6xl mx-auto px-6 text-center">
+
+        </div>
+    </footer>
+
+    <!-- D3.js Graph Logic -->
+    <script>
+        // Graph Data
+        const nodes = [
+            { id: "Projects", url: "#", isCentral: true }, // Central Node
+            { id: "SmallSat Paper", url: "project_pages/smallsat_paper.html", visitedKey: "visited_smallsat_paper" },
+            { id: "Hyperspectral VAE", url: "project_pages/utat_vae.html", visitedKey: "visited_utat_vae" },
+            { id: "Memory Interface", url: "project_pages/memory_interface.html", visitedKey: "visited_memory_interface" },
+            { id: "Wing Optimizer", url: "project_pages/propeller_optimizer.html", visitedKey: "visited_propeller_optimizer" },
+            { id: "Timmy and Tommy", url: "project_pages/timmy_and_tommy.html", visitedKey: "visited_timmy_and_tommy" },
+            { id: "Compoxel", url: "project_pages/compoxel.html", visitedKey: "visited_compoxel" },
+            { id: "BioNERBERT", url: "project_pages/bionerbert.html", visitedKey: "visited_bionerbert" },
+            { id: "Macropad", url: "project_pages/macropad.html", visitedKey: "visited_macropad" }
+        ];
+
+        // Central node connects to all others
+        const links = [
+            { source: "Projects", target: "SmallSat Paper" },
+            { source: "Projects", target: "Hyperspectral VAE" },
+            { source: "Projects", target: "Memory Interface" },
+            { source: "Projects", target: "Wing Optimizer" },
+            { source: "Projects", target: "Timmy and Tommy" },
+            { source: "Projects", target: "Compoxel" },
+            { source: "Projects", target: "BioNERBERT" },
+            { source: "Projects", target: "Macropad" }
+        ];
+
+        // Container setup
+        const container = document.getElementById('graph-container');
+        let width = container.clientWidth;
+        let height = container.clientHeight;
+
+        const svg = d3.select("#graph-container").append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        // Simulation setup
+        const simulation = d3.forceSimulation(nodes)
+            .force("link", d3.forceLink(links).id(d => d.id).distance(120))
+            .force("charge", d3.forceManyBody().strength(-400))
+            .force("center", d3.forceCenter(width / 2, height / 2))
+            .force("collide", d3.forceCollide().radius(d => d.isCentral ? 45 : 25));
+
+        // Draw Links
+        const link = svg.append("g")
+            .selectAll("line")
+            .data(links)
+            .enter().append("line")
+            .attr("class", "link")
+            .attr("stroke-width", 2);
+
+        // Draw Nodes
+        const node = svg.append("g")
+            .selectAll("circle")
+            .data(nodes)
+            .enter().append("circle")
+            .attr("class", "node")
+            .attr("r", d => d.isCentral ? 35 : 15) // Central node is larger
+            .attr("fill", d => {
+                if (d.isCentral) return "#f1f5f9"; // Slate-100 for central
+                return localStorage.getItem(d.visitedKey) ? "black" : "white";
+            })
+            .attr("stroke", "black")
+            .attr("stroke-width", d => d.isCentral ? 3 : 2)
+            .call(d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended))
+            .on("click", (event, d) => {
+                if (d.url !== "#") {
+                    window.location.href = d.url;
+                }
+            })
+            .on("mouseover", (event, d) => {
+                const tooltip = d3.select("#tooltip");
+                tooltip.html(d.id)
+                    .style("left", (event.pageX + 15) + "px")
+                    .style("top", (event.pageY - 28) + "px")
+                    .style("opacity", 1);
+            })
+            .on("mousemove", (event) => {
+                d3.select("#tooltip")
+                    .style("left", (event.pageX + 15) + "px")
+                    .style("top", (event.pageY - 28) + "px");
+            })
+            .on("mouseout", () => {
+                d3.select("#tooltip").style("opacity", 0);
+            });
+
+        // Add label to central node only
+        svg.append("g")
+            .selectAll("text")
+            .data(nodes.filter(d => d.isCentral))
+            .enter().append("text")
+            .text(d => d.id)
+            .attr("text-anchor", "middle")
+            .attr("dy", ".3em")
+            .attr("font-family", "JetBrains Mono")
+            .attr("font-size", "10px")
+            .attr("font-weight", "bold")
+            .attr("fill", "black")
+            .style("pointer-events", "none");
+
+        // Tick function for updating positions
+        simulation.on("tick", () => {
+            // Keep nodes within bounds
+            node.attr("cx", d => d.x = Math.max(35, Math.min(width - 35, d.x)))
+                .attr("cy", d => d.y = Math.max(35, Math.min(height - 35, d.y)));
+
+            link.attr("x1", d => d.source.x)
+                .attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x)
+                .attr("y2", d => d.target.y);
+
+            // Update text position for central node
+            svg.selectAll("text")
+                .attr("x", d => d.x)
+                .attr("y", d => d.y);
+        });
+
+        // Drag functions
+        function dragstarted(event, d) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+        }
+
+        function dragged(event, d) {
+            d.fx = event.x;
+            d.fy = event.y;
+        }
+
+        function dragended(event, d) {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            width = container.clientWidth;
+            height = container.clientHeight;
+            svg.attr("width", width).attr("height", height);
+            simulation.force("center", d3.forceCenter(width / 2, height / 2));
+            simulation.alpha(0.3).restart();
+        });
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Simsoc Deep Dive | Licheng Zheng</title>
+ 
+ <!-- Google Fonts Import -->
+ <link rel="preconnect" href="https://fonts.googleapis.com">
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+ 
+ <!-- KaTeX Import for Math -->
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" crossorigin="anonymous">
+ <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js" crossorigin="anonymous"></script>
+ <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" crossorigin="anonymous"
+ onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+
+ <!-- Tailwind CSS -->
+ <script src="https://cdn.tailwindcss.com"></script>
+ <script>
+ tailwind.config = {
+ darkMode: 'class',
+ theme: {
+ extend: {
+ fontFamily: {
+ sans: ['Inter', 'sans-serif'],
+ serif: ['Playfair Display', 'serif'],
+ mono: ['JetBrains Mono', 'monospace'],
+ }
+ }
+ }
+ }
+ </script>
+ <style>
+ :root { color-scheme: light; }
+ ::selection { background-color: black; color: white; }
+ .article-body p { margin-bottom: 1.5rem; line-height: 1.8; }
+ .article-body ul { list-style-type: square; margin-left: 1.5rem; margin-bottom: 1.5rem; }
+ .article-body li { margin-bottom: 0.5rem; }
+ </style>
+</head>
+<body class="bg-white text-black font-sans antialiased min-h-screen flex flex-col">
+
+ <!-- Navigation -->
+ <nav class="sticky top-0 z-50 bg-white border-b border-black w-full px-6 py-4">
+ <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+ <div class="font-serif font-bold text-xl tracking-tight">L. Zheng</div>
+ <div class="flex flex-wrap justify-center gap-6">
+ <a href="index.html" class="font-mono text-sm text-black hover:underline hover:font-bold transition-all">Home</a>
+ <a href="complex-systems.html" class="font-mono text-sm text-black hover:underline hover:font-bold transition-all">Systems and Hardware</a>
+ </div>
+ </div>
+ </nav>
+
+ <!-- Main Container -->
+ <main class="flex-grow max-w-7xl mx-auto w-full px-6 py-12 md:py-16">
+ 
+ <!-- Breadcrumbs -->
+ <div class="mb-12 font-mono text-xs text-slate-500 border-b border-black pb-4">
+ <a href="complex-systems.html" class="hover:text-black hover:underline">&larr; Systems and Hardware</a> / Simsoc Architecture
+ </div>
+
+ <!-- TWO COLUMN LAYOUT -->
+ <div class="flex flex-col lg:flex-row gap-12 lg:gap-20 items-start">
+ 
+ <!-- LEFT COLUMN: STICKY TABLE OF CONTENTS -->
+ <!-- Hidden on mobile, sticky on desktop -->
+ <aside class="hidden lg:block lg:w-64 flex-shrink-0 sticky top-28">
+ <span class="font-mono text-xs font-bold border-b-2 border-black pb-2 mb-4 block w-full">Contents</span>
+ <nav class="flex flex-col space-y-3 font-sans text-sm border-l border-slate-300 pl-4">
+ <a href="#abstract" class="text-slate-500 hover:text-black transition-colors">0. Abstract and Metadata</a>
+ <a href="#problem" class="text-slate-500 hover:text-black transition-colors">1. The Divergence Penalty</a>
+ <a href="#formulation" class="text-slate-500 hover:text-black transition-colors">2. Mathematical Formulation</a>
+ <a href="#architecture" class="text-slate-500 hover:text-black transition-colors">3. GPU Radix Sorting</a>
+ <a href="#benchmarks" class="text-slate-500 hover:text-black transition-colors">4. Profiling Results</a>
+ </nav>
+ </aside>
+
+ <!-- RIGHT COLUMN: ARTICLE CONTENT -->
+ <article class="flex-grow max-w-3xl article-body">
+ 
+ <header class="mb-12" id="abstract">
+ <h1 class="font-serif text-5xl md:text-6xl font-bold tracking-tight leading-tight mb-6">
+ Simsoc: Dynamic State Sorting to Mitigate Warp Divergence in Multi-Agent RL
+ </h1>
+ 
+ <div class="grid grid-cols-2 gap-4 border-y border-black py-4 mb-8">
+ <div>
+ <span class="font-mono text-[10px] text-slate-500 block mb-1">Status</span>
+ <span class="font-mono text-sm font-bold bg-black text-white px-2 py-0.5">IN DEVELOPMENT</span>
+ </div>
+ <div>
+ <span class="font-mono text-[10px] text-slate-500 block mb-1">Tech Stack</span>
+ <span class="font-mono text-sm">PyTorch, FLAME GPU, CUDA</span>
+ </div>
+ </div>
+
+ <p class="font-sans text-xl leading-relaxed text-slate-800">
+ When simulating complex multi-agent systems via Reinforcement Learning on GPUs, performance often degrades catastrophically due to warp divergence when agents enter different behavioral states. This architecture simulates complex agents entirely within GPU VRAM, employing dynamic Radix Sorts to ensure thread congruency.
+ </p>
+ </header>
+
+ <!-- ========================================== -->
+ <!-- INLINE QUICK NAVIGATION BOX -->
+ <!-- ========================================== -->
+ <div class="mb-12 border border-black bg-slate-50 p-6 lg:hidden">
+ <span class="font-mono text-xs font-bold border-b border-black pb-2 mb-5 block w-full text-slate-800">
+ Quick Navigation
+ </span>
+ <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 font-mono text-sm">
+ <a href="#problem" class="flex items-center gap-2 text-slate-600 hover:text-black hover:font-bold hover:underline transition-all">
+ <span class="text-black">&rarr;</span> 1. Divergence Penalty
+ </a>
+ <a href="#formulation" class="flex items-center gap-2 text-slate-600 hover:text-black hover:font-bold hover:underline transition-all">
+ <span class="text-black">&rarr;</span> 2. Math Formulation
+ </a>
+ <a href="#architecture" class="flex items-center gap-2 text-slate-600 hover:text-black hover:font-bold hover:underline transition-all">
+ <span class="text-black">&rarr;</span> 3. GPU Radix Sorting
+ </a>
+ <a href="#benchmarks" class="flex items-center gap-2 text-slate-600 hover:text-black hover:font-bold hover:underline transition-all">
+ <span class="text-black">&rarr;</span> 4. Profiling Results
+ </a>
+ </div>
+ </div>
+
+ <!-- Note the scroll-mt-24 class. This ensures when you click a link in the ToC, it scrolls down but leaves 24 units of space at the top so the sticky navbar doesn't cover the header -->
+ <h2 id="problem" class="font-serif text-3xl font-bold border-b border-black pb-2 scroll-mt-24">1. The Divergence Penalty</h2>
+ <p>
+ Graphics Processing Units execute instructions in blocks of 32 threads known as warps. This SIMT (Single Instruction, Multiple Thread) paradigm is exceptionally fast provided all threads within a warp execute the exact same instruction simultaneously. However, in an agentic simulation, agents possess memory and independent states.
+ </p>
+ 
+ <div class="my-8 border-l-4 border-black bg-slate-50 p-6 relative">
+ <span class="absolute top-0 left-0 bg-black text-white font-mono text-[10px] px-2 py-1 transform -translate-y-1/2 ml-4">The Bottleneck</span>
+ <p class="font-serif text-lg italic text-black mt-2">
+ If Agent A decides to explore while Agent B decides to attack, the CUDA warp must process both execution branches sequentially, effectively halving throughput.
+ </p>
+ </div>
+
+ <h2 id="formulation" class="font-serif text-3xl font-bold border-b border-black pb-2 scroll-mt-24">2. Mathematical Formulation</h2>
+ <p>
+ Let the set of all agents be $A = \{a_1, a_2, \dots, a_n\}$. At any timestep $t$, an agent occupies a state $S_t(a_i) \in \mathcal{S}$. In a naive array configuration, agents are stored sequentially by ID, resulting in a randomized distribution of states within a memory segment.
+ </p>
+ <div class="my-6 border border-black bg-slate-50 p-6 text-center text-lg overflow-x-auto">
+ $$ \text{Cost}_{warp} = \sum_{j=1}^{k} C(branch_j) $$
+ <span class="block mt-4 font-mono text-xs text-slate-500 text-left border-t border-black pt-2">Execution Cost of a Divergent Warp</span>
+ </div>
+ <p>
+ Our objective is to minimize $k$ (the number of unique states within a single warp) so that $k \approx 1$.
+ </p>
+
+ <h2 id="architecture" class="font-serif text-3xl font-bold border-b border-black pb-2 scroll-mt-24">3. GPU Radix Sorting implementation</h2>
+ <p>
+ To achieve $k=1$, the memory arrays must be reorganized. Before the execution of the primary neural network inference kernel, a highly optimized GPU Radix Sort reorganizes the agent arrays using their current state integer $S_t(a_i)$ as the sorting key.
+ </p>
+
+ <div class="my-8 flex flex-col md:flex-row gap-px bg-black border border-black overflow-hidden">
+ <div class="bg-white flex-1 flex flex-col w-full">
+ <div class="bg-slate-100 font-mono text-xs px-3 py-2 border-b border-black text-red-700 font-bold">Unsorted Memory (High Divergence)</div>
+ <pre class="p-4 overflow-x-auto font-mono text-[11px] text-black leading-relaxed flex-grow"><code>Warp 1:
+[State 1] [State 2] [State 1] [State 3]...
+-> Instruction serialization required.</code></pre>
+ </div>
+ <div class="bg-white flex-1 flex flex-col w-full">
+ <div class="bg-slate-100 font-mono text-xs px-3 py-2 border-b border-black text-green-700 font-bold">Sorted Memory (Zero Divergence)</div>
+ <pre class="p-4 overflow-x-auto font-mono text-[11px] text-black leading-relaxed flex-grow"><code>Warp 1:
+[State 1] [State 1] [State 1] [State 1]...
+-> Maximum SIMT throughput.</code></pre>
+ </div>
+ </div>
+
+ <h2 id="benchmarks" class="font-serif text-3xl font-bold border-b border-black pb-2 scroll-mt-24">4. Early Profiling Results</h2>
+ <p>
+ Sorting memory on a GPU takes time. The core research question was whether the time spent sorting was offset by the time saved eliminating divergence. Early profiling via Nsight Compute indicates a significant net positive.
+ </p>
+
+ <div class="my-8">
+ <div class="bg-black text-white font-mono text-xs px-4 py-1 border border-black border-b-0 inline-block ">
+ Nsight Compute Profiler Output
+ </div>
+ <pre class="bg-slate-900 text-green-400 p-4 overflow-x-auto font-mono text-sm border border-black leading-relaxed"><code>> Profiling baseline kernel (No Sort)...
+Warp Issue Efficiency: 32.4%
+L1 Cache Hit Rate: 54.1%
+Execution Time: 8.4ms
+
+> Profiling sorted kernel...
+Warp Issue Efficiency: 96.8%
+L1 Cache Hit Rate: 89.2%
+Execution Time: 3.1ms (Including 0.8ms sort overhead)
+[Result] 2.7x Speedup observed.</code></pre>
+ </div>
+ 
+ <details class="my-8 group border border-black open:bg-slate-50 cursor-pointer">
+ <summary class="font-mono text-sm font-bold bg-white p-4 border-b border-transparent group-open:border-black flex justify-between items-center transition-colors hover:bg-slate-100">
+ <span>[+] View Hardware Configuration Constraints</span>
+ <span class="text-slate-400 group-open:rotate-180 transition-transform">&#9660;</span>
+ </summary>
+ <div class="p-4 border-t border-black text-sm text-slate-700 leading-relaxed">
+ <p>All benchmarks were conducted on an NVIDIA RTX 4090 with 24GB VRAM. It should be noted that Radix Sorting requires a secondary buffer of equal size to the original array (Out-of-Place sorting). Consequently, the maximum agent count is effectively halved compared to a standard unoptimized implementation.</p>
+ </div>
+ </details>
+
+ </article>
+
+ </div>
+ </main>
+
+ <!-- Footer -->
+ <footer class="border-t border-black bg-white py-6 mt-12">
+ <div class="max-w-7xl mx-auto px-6 text-center flex flex-col md:flex-row justify-between items-center gap-4">
+ 
+ <a href="#" class="font-mono text-xs font-bold hover:underline">&uarr; Back to Top</a>
+ </div>
+ </footer>
+
+</body>
+</html>

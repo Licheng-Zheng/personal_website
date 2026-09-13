@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Hardware, Games and Misc | Licheng Zheng</title>
+ 
+ <!-- Google Fonts Import -->
+ <link rel="preconnect" href="https://fonts.googleapis.com">
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+ 
+ <!-- Tailwind CSS (CDN for single-file deployment) -->
+ <script src="https://cdn.tailwindcss.com"></script>
+ 
+ <!-- Tailwind Configuration -->
+ <script>
+ tailwind.config = {
+ darkMode: 'class', // Disables automatic dark mode
+ theme: {
+ extend: {
+ fontFamily: {
+ sans: ['Inter', 'sans-serif'],
+ serif: ['Playfair Display', 'serif'],
+ mono: ['JetBrains Mono', 'monospace'],
+ }
+ }
+ }
+ }
+ </script>
+ <style>
+ /* Enforce Light Mode at the browser level */
+ :root { color-scheme: light; }
+ ::selection { background-color: black; color: white; }
+ </style>
+</head>
+<body class="bg-white text-black font-sans antialiased min-h-screen flex flex-col">
+
+ <!-- Navigation -->
+ <nav class="sticky top-0 z-50 bg-white border-b border-black w-full px-6 py-4">
+ <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+ <div class="font-serif font-bold text-xl tracking-tight">
+ L. Zheng
+ </div>
+ <!-- Links -->
+ <div class="flex flex-wrap justify-center gap-6">
+ <a href="index.html" class="font-mono text-sm text-black hover:underline hover:font-bold transition-all">Home</a>
+ <a href="ml_compute.html" class="font-mono text-sm text-black hover:underline hover:font-bold transition-all">ML and Compute</a>
+ <a href="complex_systems.html" class="font-mono text-sm text-black hover:underline hover:font-bold transition-all">Systems and Hardware</a>
+ <a href="hardware_misc.html" class="font-mono text-sm text-black hover:underline hover:font-bold transition-all underline font-bold">Hardware and Misc</a>
+ </div>
+ </div>
+ </nav>
+
+ <!-- Main Content -->
+ <main class="flex-grow max-w-6xl mx-auto w-full px-6 py-12 md:py-20">
+ 
+ <!-- Page Header -->
+ <header class="mb-16">
+ <h1 class="font-serif text-5xl md:text-6xl font-bold tracking-tight mb-4">
+ Hardware, Games and Misc
+ </h1>
+ <p class="font-mono text-sm text-slate-600 border-l-2 border-black pl-3 max-w-3xl">
+ A rigid matrix of standalone projects, mechanical builds, software architecture, and game development logic.
+ </p>
+ </header>
+
+ <!-- Rigid Grid Layout -->
+ <div class="grid grid-cols-1 lg:grid-cols-2 gap-px bg-black border border-black">
+ 
+ <!-- PROJECT 1: 76mm Newtonian Telescope -->
+ <article class="bg-white p-8 lg:p-10 flex flex-col h-full">
+ <h2 class="font-serif text-3xl font-bold mb-3">76mm Newtonian Telescope</h2>
+ <div class="flex flex-wrap gap-2 mb-6">
+ <span class="font-mono text-xs text-slate-700 bg-white border border-black px-2 py-1 rounded-none">Optics</span>
+ <span class="font-mono text-xs text-slate-700 bg-white border border-black px-2 py-1 rounded-none">Mechanical Build</span>
+ <span class="font-mono text-xs text-slate-700 bg-white border border-black px-2 py-1 rounded-none">Astrophotography</span>
+ </div>
+ <div class="space-y-4 text-black text-sm md:text-base leading-relaxed flex-grow">
+ <p><span class="font-bold font-sans">Scope:</span> Complete mechanical and optical assembly of a 76mm aperture Newtonian reflector telescope.</p>
+ <p><span class="font-bold font-sans">Implementation:</span> Focus on precise optical alignment (collimation) of the primary parabolic mirror and secondary diagonal mirror. The mechanical build ensures rigid structural integrity to support tracking and astrophotography payloads without optical deviation.</p>
+ </div>
+ 
+ <!-- 2x2 Grid Placeholder for CAD/Astrophotography -->
+ <figure class="w-full mt-8">
+ <div class="grid grid-cols-2 gap-px bg-black border border-black w-full aspect-square">
+ <div class="bg-slate-100 flex items-center justify-center p-2 relative overflow-hidden">
+ <span class="font-mono text-[10px] text-slate-400 absolute">CAD View 1</span>
+ </div>
+ <div class="bg-slate-100 flex items-center justify-center p-2 relative overflow-hidden">
+ <span class="font-mono text-[10px] text-slate-400 absolute">CAD View 2</span>
+ </div>
+ <div class="bg-slate-100 flex items-center justify-center p-2 relative overflow-hidden">
+ <span class="font-mono text-[10px] text-slate-400 absolute">Astro Photo 1</span>
+ </div>
+ <div class="bg-slate-100 flex items-center justify-center p-2 relative overflow-hidden">
+ <span class="font-mono text-[10px] text-slate-400 absolute">Astro Photo 2</span>
+ </div>
+ </div>
+ <figcaption class="mt-3 font-serif italic text-sm text-slate-700">
+ Top: CAD mechanical assemblies. Bottom: Initial astrophotography captures.
+ </figcaption>
+ </figure>
+ </article>
+
+ <!-- PROJECT 2: Inhuman (Unity Game) -->
+ <article class="bg-white p-8 lg:p-10 flex flex-col h-full relative">
+ <div class="absolute top-0 right-0 bg-black text-white px-3 py-1 z-10 border-b border-l border-black">
+ <span class="font-mono text-[10px] ">In Dev</span>
+ </div>
+ <h2 class="font-serif text-3xl font-bold mb-3 pr-20">Inhuman</h2>
+ <div class="flex flex-wrap gap-2 mb-6">
+ <span class="font-mono text-xs text-slate-700 bg-white border border-black px-2 py-1 rounded-none">Unity 3D</span>
+ <span class="font-mono text-xs text-slate-700 bg-white border border-black px-2 py-1 rounded-none">C#</span>
+ <span class="font-mono text-xs text-slate-700 bg-white border border-black px-2 py-1 rounded-none">A* Pathfinding</span>
+ <span class="font-mono text-xs text-slate-700 bg-white border border-black px-2 py-1 rounded-none">Object Pooling</span>
+ </div>
+ <div class="space-y-4 text-black text-sm md:text-base leading-relaxed flex-grow">
+ <p><span class="font-bold font-sans">Mechanics:</span> A systems-heavy 3D game environment focused on optimized agent behavior and memory management.</p>
+ <p><span class="font-bold font-sans">Engineering:</span> Bypassing Unity's standard instantiation overhead by implementing rigorous C# object pooling for all projectiles and dynamic entities. Enemy agent navigation is governed by a custom A* (A-Star) pathfinding implementation, dynamically recalculating routes over changing navmeshes.</p>
+ </div>
+ 
+ <!-- YouTube iFrame Placeholder -->
+ <figure class="w-full mt-8">
+ <!-- RESPONSIVE YOUTUBE WRAPPER -->
+ <div class="relative w-full aspect-video border border-black bg-slate-100 flex items-center justify-center">
+ <!-- =========================================================
+ EDIT THE IFRAME BELOW TO ADD YOUR YOUTUBE URL
+ Replace 'https://www.youtube.com/embed/YOUR_VIDEO_ID'
+ ========================================================= -->
+ <iframe 
+ class="absolute top-0 left-0 w-full h-full" 
+ src="https://www.youtube.com/embed/YOUR_VIDEO_ID" 
+ title="Inhuman Gameplay Trailer" 
+ frameborder="0" 
+ allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+ allowfullscreen>
+ </iframe>
+ </div>
+ <figcaption class="mt-3 font-serif italic text-sm text-slate-700">
+ Gameplay trailer demonstrating pathfinding logic and pooled entity rendering.
+ </figcaption>
+ </figure>
+ </article>
+
+ <!-- PROJECT 3: Variable Wing Plane -->
+ <article class="bg-white p-8 lg:p-10 flex flex-col h-full relative">
+ <div class="absolute top-0 right-0 bg-black text-white px-3 py-1 z-10 border-b border-l border-black">
+ <span class="font-mono text-[10px] ">In Dev</span>
+ </div>
+ <h2 class="font-serif text-3xl font-bold mb-3 pr-20">Variable Wing Plane</h2>
+ <div class="flex flex-wrap gap-2 mb-6">
+ <span class="font-mono text-xs text-slate-700 bg-white border border-black px-2 py-1 rounded-none">Mechanical CAD</span>
+ <span class="font-mono text-xs text-slate-700 bg-white border border-black px-2 py-1 rounded-none">Aerodynamics</span>
+ </div>
+ <div class="space-y-4 text-black text-sm md:text-base leading-relaxed flex-grow">
+ <p><span class="font-bold font-sans">Objective:</span> Design and construct a fixed-wing aircraft capable of altering its wing sweep/geometry mid-flight to optimize for both low-speed loitering and high-speed transit.</p>
+ <p><span class="font-bold font-sans">Engineering:</span> Currently deep in the Mechanical CAD phase, designing the actuating pivot mechanisms and structural spars required to withstand shifting aerodynamic loads during transition phases.</p>
+ </div>
+ 
+ <!-- Image Placeholder -->
+ <figure class="w-full mt-8">
+ <div class="w-full aspect-video bg-slate-100 border border-black flex items-center justify-center relative">
+ <span class="font-mono text-xs text-slate-400 absolute">assets/images/variable_wing_cad.webp</span>
+ </div>
+ <figcaption class="mt-3 font-serif italic text-sm text-slate-700">
+ Mechanical CAD rendering of the variable sweep wing pivot mechanism.
+ </figcaption>
+ </figure>
+ </article>
+
+ <!-- PROJECT 4: Task Tracker App -->
+ <article class="bg-white p-8 lg:p-10 flex flex-col h-full">
+ <h2 class="font-serif text-3xl font-bold mb-3">Task Tracker App</h2>
+ <div class="flex flex-wrap gap-2 mb-6">
+ <span class="font-mono text-xs text-slate-700 bg-white border border-black px-2 py-1 rounded-none">SQL</span>
+ <span class="font-mono text-xs text-slate-700 bg-white border border-black px-2 py-1 rounded-none">Database Architecture</span>
+ <span class="font-mono text-xs text-slate-700 bg-white border border-black px-2 py-1 rounded-none">Backend</span>
+ </div>
+ <div class="space-y-4 text-black text-sm md:text-base leading-relaxed flex-grow">
+ <p><span class="font-bold font-sans">Architecture:</span> Development of a robust relational database backend for a task tracking application.</p>
+ <p><span class="font-bold font-sans">Implementation:</span> Strict adherence to normalization principles to prevent data anomalies. Engineered complex SQL queries and views to handle user roles, nested task dependencies, and project lifecycle states.</p>
+ </div>
+ 
+ <!-- Image Placeholder -->
+ <figure class="w-full mt-8">
+ <div class="w-full aspect-[4/3] bg-slate-100 border border-black flex items-center justify-center relative">
+ <span class="font-mono text-xs text-slate-400 absolute">assets/images/sql_er_diagram.webp</span>
+ </div>
+ <figcaption class="mt-3 font-serif italic text-sm text-slate-700">
+ SQL Entity-Relationship (ER) diagram mapping user, task, and dependency structures.
+ </figcaption>
+ </figure>
+ </article>
+
+ </div>
+ </main>
+
+ <!-- Footer -->
+ <footer class="border-t border-black bg-white py-6">
+ <div class="max-w-6xl mx-auto px-6 text-center">
+ 
+ </div>
+ </footer>
+
+</body>
+</html>

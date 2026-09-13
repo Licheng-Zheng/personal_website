@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Systems and Hardware | Licheng Zheng</title>
+ 
+ <!-- Google Fonts Import -->
+ <link rel="preconnect" href="https://fonts.googleapis.com">
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+ 
+ <!-- Tailwind CSS (CDN for single-file deployment) -->
+ <script src="https://cdn.tailwindcss.com"></script>
+ 
+ <!-- Tailwind Configuration -->
+ <script>
+ tailwind.config = {
+ darkMode: 'class', // Disables automatic dark mode
+ theme: {
+ extend: {
+ fontFamily: {
+ sans: ['Inter', 'sans-serif'],
+ serif: ['Playfair Display', 'serif'],
+ mono: ['JetBrains Mono', 'monospace'],
+ }
+ }
+ }
+ }
+ </script>
+ <style>
+ /* Enforce Light Mode at the browser level */
+ :root { color-scheme: light; }
+ ::selection { background-color: black; color: white; }
+ </style>
+</head>
+<body class="bg-white text-black font-sans antialiased min-h-screen flex flex-col">
+
+ <!-- Navigation -->
+ <nav class="sticky top-0 z-50 bg-white border-b border-black w-full px-6 py-4">
+ <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+ <div class="font-serif font-bold text-xl tracking-tight">
+ L. Zheng
+ </div>
+ <!-- Links -->
+ <div class="flex flex-wrap justify-center gap-6">
+ <a href="index.html" class="font-mono text-sm text-black hover:underline hover:font-bold transition-all">Home</a>
+ <a href="ml_compute.html" class="font-mono text-sm text-black hover:underline hover:font-bold transition-all">ML and Compute</a>
+ <a href="complex_systems.html" class="font-mono text-sm text-black hover:underline hover:font-bold transition-all underline font-bold">Systems and Hardware</a>
+ <a href="hardware_misc.html" class="font-mono text-sm text-black hover:underline hover:font-bold transition-all">Hardware and Misc</a>
+ </div>
+ </div>
+ </nav>
+
+ <!-- Main Content -->
+ <main class="flex-grow max-w-6xl mx-auto w-full px-6 py-12 md:py-20">
+ 
+ <!-- Page Header -->
+ <header class="mb-16">
+ <h1 class="font-serif text-5xl md:text-6xl font-bold tracking-tight mb-4">
+ Systems and Hardware
+ </h1>
+ <p class="font-mono text-sm text-slate-600 border-l-2 border-black pl-3 max-w-3xl">
+ An Architecture-First view of current and completed projects spanning complex simulations, knowledge graphs, and bare-metal embedded programming. 
+ </p>
+ </header>
+
+ <!-- Project Index Grid -->
+ <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 border-b border-black pb-12 mb-16">
+ 
+ <!-- Card 1: Global Argument Mapper -->
+ <a href="#argument-mapper" class="group flex flex-col h-full border border-black bg-white hover:bg-slate-50 transition-colors relative">
+ <div class="absolute top-0 right-0 bg-black text-white px-2 py-1 z-10 border-b border-l border-black">
+ <span class="font-mono text-[9px] ">In Dev</span>
+ </div>
+ <div class="aspect-video border-b border-black bg-slate-100 flex items-center justify-center p-2 relative overflow-hidden">
+ <span class="font-mono text-[10px] text-slate-400 text-center">assets/images/mapper_thumb.webp</span>
+ </div>
+ <div class="p-4 flex flex-col flex-grow">
+ <h3 class="font-serif font-bold text-lg mb-2 group-hover:underline decoration-2">Argument Mapper</h3>
+ <p class="font-sans text-xs text-slate-700 leading-relaxed">Knowledge graph extraction pipeline utilizing FAISS IndexIVFPQ.</p>
+ </div>
+ </a>
+
+ <!-- Card 2: Simsoc -->
+ <a href="#simsoc" class="group flex flex-col h-full border border-black bg-white hover:bg-slate-50 transition-colors relative">
+ <div class="absolute top-0 right-0 bg-black text-white px-2 py-1 z-10 border-b border-l border-black">
+ <span class="font-mono text-[9px] ">In Dev</span>
+ </div>
+ <div class="aspect-video border-b border-black bg-slate-100 flex items-center justify-center p-2 relative overflow-hidden">
+ <span class="font-mono text-[10px] text-slate-400 text-center">assets/images/simsoc_thumb.webp</span>
+ </div>
+ <div class="p-4 flex flex-col flex-grow">
+ <h3 class="font-serif font-bold text-lg mb-2 group-hover:underline decoration-2">Simsoc (GPU RL)</h3>
+ <p class="font-sans text-xs text-slate-700 leading-relaxed">Agent simulation using GPU Radix Sorts to mitigate warp divergence.</p>
+ </div>
+ </a>
+
+ <!-- Card 3: Airfoil Optimizer -->
+ <a href="#airfoil-optimizer" class="group flex flex-col h-full border border-black bg-white hover:bg-slate-50 transition-colors">
+ <div class="aspect-video border-b border-black bg-slate-100 flex items-center justify-center p-2 relative overflow-hidden">
+ <span class="font-mono text-[10px] text-slate-400 text-center">assets/images/airfoil_thumb.webp</span>
+ </div>
+ <div class="p-4 flex flex-col flex-grow">
+ <h3 class="font-serif font-bold text-lg mb-2 group-hover:underline decoration-2">Airfoil Optimizer</h3>
+ <p class="font-sans text-xs text-slate-700 leading-relaxed">Computational fluid dynamics curve optimization and analysis.</p>
+ </div>
+ </a>
+
+ <!-- Card 4: GoTo Telescope -->
+ <a href="#telescope-mount" class="group flex flex-col h-full border border-black bg-white hover:bg-slate-50 transition-colors relative">
+ <div class="absolute top-0 right-0 bg-black text-white px-2 py-1 z-10 border-b border-l border-black">
+ <span class="font-mono text-[9px] ">In Dev</span>
+ </div>
+ <div class="aspect-video border-b border-black bg-slate-100 flex items-center justify-center p-2 relative overflow-hidden">
+ <span class="font-mono text-[10px] text-slate-400 text-center">assets/images/telescope_thumb.webp</span>
+ </div>
+ <div class="p-4 flex flex-col flex-grow">
+ <h3 class="font-serif font-bold text-lg mb-2 group-hover:underline decoration-2">GoTo Telescope</h3>
+ <p class="font-sans text-xs text-slate-700 leading-relaxed">Bare-metal C/C++ physical hardware actuation via STM32/ESP32.</p>
+ </div>
+ </a>
+
+ </section>
+
+ <div class="space-y-24">
+ 
+ <!-- PROJECT 1: Global Argument Mapper -->
+ <article id="argument-mapper" class="grid grid-cols-1 lg:grid-cols-12 gap-10 scroll-mt-24">
+ <!-- Text Column -->
+ <div class="lg:col-span-7 flex flex-col">
+ <h2 class="font-serif text-3xl font-bold mb-3 flex items-center flex-wrap gap-3">
+ Global Argument Mapper
+ <span class="font-mono text-xs bg-black text-white px-2 py-1 tracking-wider whitespace-nowrap">[STATUS: IN ACTIVE DEVELOPMENT]</span>
+ </h2>
+ <div class="flex flex-wrap gap-2 mb-6">
+ <span class="font-mono text-xs text-slate-700 bg-white border border-black px-2 py-1 rounded-none">Knowledge Graphs</span>
+ <span class="font-mono text-xs text-slate-700 bg-white border border-black px-2 py-1 rounded-none">Web Scraping</span>
+ <span class="font-mono text-xs text-slate-700 bg-white border border-black px-2 py-1 rounded-none">FAISS IndexIVFPQ</span>
+ </div>
+ 
+ <div class="space-y-4 text-black text-sm md:text-base leading-relaxed">
+ <p><span class="font-bold font-sans">Context:</span> Mapping nuanced, large-scale debates across the internet requires ingesting massive volumes of unstructured text and structuring it into a queryable semantic format.</p>
+ <p><span class="font-bold font-sans">Architecture:</span> Constructing a robust automated web scraping pipeline that feeds into a dense Knowledge Graph. To handle the scale of semantic similarity search required for mapping arguments, the system utilizes Facebook's FAISS (specifically <span class="font-mono text-sm border border-black px-1">IndexIVFPQ</span>) for highly compressed, inverted file system vector search.</p>
+ <p><span class="font-bold font-sans">Current Status:</span> Actively developing the data ingestion and FAISS vector indexing pipeline to ensure sub-millisecond retrieval times on billions of scraped embeddings.</p>
+ </div>
+ </div>
+ <!-- Image Column -->
+ <div class="lg:col-span-5">
+ <figure class="w-full">
+ <div class="w-full aspect-[4/3] bg-slate-100 border border-black flex items-center justify-center relative">
+ <span class="font-mono text-xs text-slate-400 absolute">assets/images/mapper_architecture.webp</span>
+ <!-- <img src="assets/images/mapper_architecture.webp" alt="Mapper Architecture Diagram" class="w-full h-full object-cover"> -->
+ </div>
+ <figcaption class="mt-2 font-serif italic text-sm text-slate-700">
+ Architecture diagram displaying the Web Scraper &rarr; FAISS &rarr; Graph pipeline.
+ </figcaption>
+ </figure>
+ </div>
+ </article>
+
+ <hr class="border-t border-black">
+
+ <!-- PROJECT 2: Simsoc -->
+ <article id="simsoc" class="grid grid-cols-1 lg:grid-cols-12 gap-10 scroll-mt-24">
+ <!-- Text Column -->
+ <div class="lg:col-span-7 flex flex-col">
+ <h2 class="font-serif text-3xl font-bold mb-3 flex items-center flex-wrap gap-3">
+ Simsoc: Dynamic State Sorting
+ <span class="font-mono text-xs bg-black text-white px-2 py-1 tracking-wider whitespace-nowrap">[STATUS: IN ACTIVE DEVELOPMENT]</span>
+ </h2>
+ <div class="flex flex-wrap gap-2 mb-6">
+ <span class="font-mono text-xs text-slate-700 bg-white border border-black px-2 py-1 rounded-none">PyTorch</span>
+ <span class="font-mono text-xs text-slate-700 bg-white border border-black px-2 py-1 rounded-none">FLAME GPU</span>
+ <span class="font-mono text-xs text-slate-700 bg-white border border-black px-2 py-1 rounded-none">Reinforcement Learning</span>
+ </div>
+ 
+ <div class="space-y-4 text-black text-sm md:text-base leading-relaxed">
+ <p><span class="font-bold font-sans">Context:</span> Simulating complex multi-agent systems via Reinforcement Learning on GPUs often leads to severe performance degradation due to warp divergence when agents enter different behavioral states.</p>
+ <p><span class="font-bold font-sans">Architecture:</span> Engineering an environment that simulates complex agents entirely within GPU VRAM. To mitigate warp divergence, the architecture heavily employs dynamic GPU Radix Sorts to continually reorder agents by state memory contiguously, ensuring threads within a CUDA warp execute identical instruction paths.</p>
+ <p><span class="font-bold font-sans">Current Status:</span> Implementing the core PyTorch to FLAME GPU data flow and validating the computational overhead of continuous sorting against the baseline divergence penalty.</p>
+ </div>
+ </div>
+ <!-- Image Column -->
+ <div class="lg:col-span-5">
+ <figure class="w-full">
+ <div class="w-full aspect-[4/3] bg-slate-100 border border-black flex items-center justify-center relative">
+ <span class="font-mono text-xs text-slate-400 absolute">assets/images/simsoc_architecture.webp</span>
+ <!-- <img src="assets/images/simsoc_architecture.webp" alt="Simsoc System Diagram" class="w-full h-full object-cover"> -->
+ </div>
+ <figcaption class="mt-2 font-serif italic text-sm text-slate-700">
+ System diagram illustrating the dynamic PyTorch &rarr; FLAME GPU data flow.
+ </figcaption>
+ </figure>
+ </div>
+ </article>
+
+ <hr class="border-t border-black">
+
+ <!-- PROJECT 3: Airfoil Optimizer -->
+ <article id="airfoil-optimizer" class="grid grid-cols-1 lg:grid-cols-12 gap-10 scroll-mt-24">
+ <!-- Text Column -->
+ <div class="lg:col-span-7 flex flex-col">
+ <h2 class="font-serif text-3xl font-bold mb-3">Airfoil Optimizer</h2>
+ <div class="flex flex-wrap gap-2 mb-6">
+ <span class="font-mono text-xs text-slate-700 bg-white border border-black px-2 py-1 rounded-none">Python</span>
+ <span class="font-mono text-xs text-slate-700 bg-white border border-black px-2 py-1 rounded-none">Matplotlib</span>
+ <span class="font-mono text-xs text-slate-700 bg-white border border-black px-2 py-1 rounded-none">CFD Math</span>
+ </div>
+ 
+ <div class="space-y-4 text-black text-sm md:text-base leading-relaxed">
+ <p><span class="font-bold font-sans">Objective:</span> Automate the iterative generation and evaluation of airfoil geometries based on strict aerodynamic constraints.</p>
+ <p><span class="font-bold font-sans">Implementation:</span> Built a programmatic solver that processes desired lift-to-drag ratios and structural constraints to output mathematical curve optimizations. The tool sidesteps complex graphical user interfaces in favor of pure, scriptable numerical evaluation and static plot generation.</p>
+ </div>
+ </div>
+ <!-- Image Column -->
+ <div class="lg:col-span-5">
+ <figure class="w-full">
+ <div class="w-full aspect-square bg-slate-100 border border-black flex items-center justify-center relative p-4">
+ <span class="font-mono text-xs text-slate-400 absolute">assets/images/airfoil_plot.webp</span>
+ <!-- <img src="assets/images/airfoil_plot.webp" alt="Airfoil Plot" class="w-full h-full object-contain"> -->
+ </div>
+ <figcaption class="mt-2 font-serif italic text-sm text-slate-700">
+ Static Matplotlib generation displaying the mathematically optimized airfoil curve.
+ </figcaption>
+ </figure>
+ </div>
+ </article>
+
+ <hr class="border-t border-black">
+
+ <!-- PROJECT 4: Automated GoTo Telescope Mount -->
+ <article id="telescope-mount" class="grid grid-cols-1 lg:grid-cols-12 gap-10 scroll-mt-24">
+ <!-- Text Column -->
+ <div class="lg:col-span-7 flex flex-col">
+ <h2 class="font-serif text-3xl font-bold mb-3 flex items-center flex-wrap gap-3">
+ Automated GoTo Telescope Mount
+ <span class="font-mono text-xs bg-black text-white px-2 py-1 tracking-wider whitespace-nowrap">[STATUS: IN ACTIVE DEVELOPMENT]</span>
+ </h2>
+ <div class="flex flex-wrap gap-2 mb-6">
+ <span class="font-mono text-xs text-slate-700 bg-white border border-black px-2 py-1 rounded-none">C/C++</span>
+ <span class="font-mono text-xs text-slate-700 bg-white border border-black px-2 py-1 rounded-none">STM32 / ESP32</span>
+ <span class="font-mono text-xs text-slate-700 bg-white border border-black px-2 py-1 rounded-none">Bare-Metal Firmware</span>
+ </div>
+ 
+ <div class="space-y-4 text-black text-sm md:text-base leading-relaxed">
+ <p><span class="font-bold font-sans">Context:</span> Precision astronomical tracking requires translating complex celestial coordinate mathematics directly into micro-stepped motor movements.</p>
+ <p><span class="font-bold font-sans">Architecture:</span> Utilizing bare-metal C/C++ firmware targeting STM32 and ESP32 microcontrollers. The architecture bypasses heavy OS layers to achieve strict real-time execution limits, ensuring that the physical hardware actuation precisely mirrors the calculated sidereal tracking rates without latency jitter.</p>
+ <p><span class="font-bold font-sans">Current Status:</span> Currently wiring the stepping drivers and calibrating the translation algorithms between the firmware math and the physical gear ratios.</p>
+ </div>
+ </div>
+ <!-- Image Column -->
+ <div class="lg:col-span-5">
+ <figure class="w-full">
+ <div class="w-full aspect-[4/3] bg-slate-100 border border-black flex items-center justify-center relative">
+ <span class="font-mono text-xs text-slate-400 absolute">assets/images/telescope_schematic.webp</span>
+ <!-- <img src="assets/images/telescope_schematic.webp" alt="Telescope Wiring Schematic" class="w-full h-full object-cover"> -->
+ </div>
+ <figcaption class="mt-2 font-serif italic text-sm text-slate-700">
+ Hardware wiring and signal flow schematic for the STM32 to stepper driver array.
+ </figcaption>
+ </figure>
+ </div>
+ </article>
+
+ </div>
+ </main>
+
+ <!-- Footer -->
+ <footer class="border-t border-black bg-white py-6 mt-20">
+ <div class="max-w-6xl mx-auto px-6 text-center">
+ 
+ </div>
+ </footer>
+
+</body>
+</html>

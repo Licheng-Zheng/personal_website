@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Static Linear Arena for PyTorch LLMs | Licheng Zheng</title>
+ <link rel="preconnect" href="https://fonts.googleapis.com">
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+ <script src="https://cdn.tailwindcss.com"></script>
+ <script>
+ tailwind.config = {
+ darkMode: 'class',
+ theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], serif: ['Playfair Display', 'serif'], mono: ['JetBrains Mono', 'monospace'], } } }
+ }
+ </script>
+ <style>
+ :root { color-scheme: light; }
+ ::selection { background-color: black; color: white; }
+ .article-body p { margin-bottom: 1.5rem; line-height: 1.8; }
+ .article-body ul { list-style-type: square; margin-left: 1.5rem; margin-bottom: 1.5rem; }
+ .article-body li { margin-bottom: 0.5rem; }
+ pre, pre[class*="language-"] { 
+    border-left: 6px solid #fdba74 !important; 
+    box-shadow: none !important; 
+    white-space: pre-wrap !important; 
+    word-break: break-word !important; 
+ }
+ pre::before, pre::after, pre[class*="language-"]::before, pre[class*="language-"]::after { display: none !important; }
+ code, code[class*="language-"] { 
+    border: none !important;
+    box-shadow: none !important;
+    white-space: pre-wrap !important; 
+    word-break: break-word !important; 
+ }
+ </style>
+ <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-coy.min.css" rel="stylesheet" />
+ <link rel="icon" type="image/png" href="../assets/favicon.png">
+
+ <!-- KaTeX Import for Math Equations -->
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" crossorigin="anonymous">
+ <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js" crossorigin="anonymous"></script>
+ <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body, {delimiters:[{left: '$$', right: '$$', display: true},{left: '$', right: '$', display: false}]});"></script>
+</head>
+<body class="bg-white text-black font-sans antialiased min-h-screen flex flex-col">
+ <!-- Scroll Progress Bar -->
+ <div id="scroll-progress" class="fixed top-0 left-0 h-2 bg-black shadow-md z-[100] transition-all duration-75" style="width: 0%;"></div>
+ <script>
+ window.addEventListener('scroll', () => {
+ const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+ const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+ const scrolled = height > 0 ? (winScroll / height) * 100 : 0;
+ document.getElementById('scroll-progress').style.width = scrolled + '%';
+ });
+ </script>
+
+
+ <!-- Navigation -->
+ <nav class="sticky top-0 z-50 bg-white border-b border-black w-full px-6 py-4">
+ <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+ <a href="../index.html" class="font-serif font-bold text-xl tracking-tight hover:underline block">L. Zheng</a>
+ <div class="flex flex-wrap justify-center gap-6">
+ <a href="../index.html" class="font-mono text-sm text-black hover:underline hover:font-bold transition-all">Home</a>
+ <a href="../projects.html" class="font-mono text-sm text-black hover:underline hover:font-bold transition-all">Projects</a>
+ </div>
+ </div>
+ </nav>
+
+ <!-- Main Container -->
+ <main class="flex-grow max-w-7xl mx-auto w-full px-6 py-12 md:py-16">
+ <div class="mb-12 font-mono text-xs text-slate-500 border-b border-black pb-4">
+ <a href="../projects.html" class="hover:text-black hover:underline">&larr; Projects</a> / Memory Interface
+ </div>
+
+ <div class="flex flex-col lg:flex-row gap-12 lg:gap-20 items-start">
+ <aside class="hidden lg:block lg:w-64 flex-shrink-0 sticky top-28">
+ <span class="font-mono text-xs font-bold border-b-2 border-black pb-2 mb-4 block w-full">Contents</span>
+ <nav class="flex flex-col space-y-3 font-sans text-sm border-l border-slate-300 pl-4">
+ <a href="#abstract" class="text-slate-500 hover:text-black transition-colors">0. Abstract and Metadata</a>
+ <a href="#fragmentation" class="text-slate-500 hover:text-black transition-colors">1. PyTorch Memory Fragmentation</a>
+ <a href="#arena" class="text-slate-500 hover:text-black transition-colors">2. The Static Linear Arena</a>
+ <a href="#paged-attention" class="text-slate-500 hover:text-black transition-colors">3. PagedAttention vs. Contiguous</a>
+ </nav>
+ 
+ <!-- Interactive Graph -->
+ <div class="mt-12 w-full h-[250px] border border-black bg-slate-50 flex flex-col shadow-sm relative overflow-hidden">
+ <div class="border-b border-black p-2 bg-white">
+ <h3 class="font-mono text-[8px] font-bold text-center">Interactive Graph</h3>
+ </div>
+ <div id="graph-container" class="flex-grow relative w-full h-full"></div>
+ </div>
+ <!-- Tooltip for Graph -->
+ <div id="tooltip" style="position: fixed; opacity: 0; background-color: white; border: 1px solid black; padding: 4px 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; pointer-events: none; z-index: 100;"></div>
+
+ </aside>
+
+ <article class="flex-grow max-w-3xl article-body">
+ <header class="mb-12" id="abstract">
+ <h1 class="font-serif text-5xl md:text-6xl font-bold tracking-tight leading-tight mb-6">Static Linear Arena for PyTorch LLMs</h1>
+ <div class="grid grid-cols-2 md:grid-cols-3 gap-4 border-y border-black py-4 mb-8">
+ <div id="telemetry-container" data-project-slug="memory_interface">
+ <span class="font-mono text-[10px] text-slate-500 block mb-1">Status</span>
+ <div id="telemetry-content"><span class="font-mono text-sm text-slate-400">Loading telemetry...</span></div>
+ </div>
+ <div>
+ <span class="font-mono text-[10px] text-slate-500 block mb-1">Tech Stack</span>
+ <span class="font-mono text-sm">PyTorch, Python</span>
+ </div>
+ <div class="col-span-2 md:col-span-1">
+ <span class="font-mono text-[10px] text-slate-500 block mb-1">Repository</span>
+ <a href="https://github.com/Licheng-Zheng" target="_blank" class="font-mono text-sm text-blue-600 hover:underline">View on GitHub &nearr;</a>
+ </div>
+ </div>
+ <p class="font-sans text-xl leading-relaxed text-slate-800 font-bold">
+ Created a zero-allocation memory arena for local LLM inference in PyTorch. This memory interface replaces PyTorch's native dynamic memory allocation (<code>torch.cat</code>) with a Static Linear Arena which eliminates memory fragmentation and Out-Of-Memory (OOM) crashes during generation.
+ </p>
+ </header>
+ 
+ <img src="../assets/images/projects/memory_interface/fragmentation.webp" alt="Baseline vs Static Arena Fragmentation Comparison Chart" class="w-full border border-black mb-10 shadow-sm">
+
+ <h2 id="fragmentation" class="font-serif text-3xl font-bold border-b border-black pb-2 scroll-mt-24 mt-12 mb-6">1. Memory Fragmentation in PyTorch</h2>
+
+ <p>During token generation, a Large Language Model must cache the Key and Value (KV) vectors of prior tokens (in something called a KV cache!), this is how they compute attention in the transformer architecture. Natively, PyTorch appends these vectors dynamically via <code>torch.cat</code>. This results in the following:</p>
+
+ <ul class="list-disc pl-5 mb-6">
+ <li><strong>Allocation Overhead:</strong> The GPU must constantly request new, slightly larger blocks of memory in the GPU from the OS, copy the historical KV cache over, and delete the old block.</li>
+ <li><strong>Memory Fragmentation:</strong> This repeated reallocation results in "holes" in the memory that are just smaller than the size of a single token (meaning it is wasted memory). Eventually, PyTorch will request a contiguous block larger than any available free spot in memory, resulting in an Out-Of-Memory (OOM) crash despite the total free VRAM being sufficient.</li>
+ </ul>
+
+ <h2 id="arena" class="font-serif text-3xl font-bold border-b border-black pb-2 scroll-mt-24 mt-12 mb-6">2. The Static Linear Arena using bump pointers</h2>
+
+ <p>Because LLM KV cache vectors have a fixed dimensional size based on the model architecture and context window, the dynamic allocation that Pytorch does is unnecessary. Additionally, for almost all models, the Key and value vectors are the same size, allowing us to use a single size bump pointer for all tokens.</p>
+
+ <p>Here is how the static arena uses the memory:</p>
+ <ol class="list-decimal pl-5 mb-6">
+ <li><strong>Pre-Allocation:</strong> When the model initializes, a single contiguous VRAM block representing the absolute maximum context window is allocated upfront. Currently this is set by a user variable, but in the future this can be done dynamically so it will work immediately after providing it with a model.</li>
+ <li><strong>Zero-Allocation Slicing:</strong> During inference, a bump-pointer incremenets by exactly one token, and the new token is stored in the new spot that perfectly fits the singular token with no memory fragmentation.</li>
+ </ol>
+ <p>This prevents the use of PyTorch's <code>malloc</code>, which prevents  memory fragmentation and ensures that resource constrained models do not OOM when they are running on Pytorch.</p>
+
+ <h3 class="font-bold text-lg mt-6 mb-2">Model Selection: Qwen2.5-1.5B-Instruct</h3>
+ <p>The Static Arena was benchmarked using Qwen 2.5 1.5B. This model was selected because its 1.54 billion parameters (~3.08 GB in bfloat16) fits easily on standard 16GB T4 GPUs while possessing a 32,768 token context window (it uses about 3.5GB of memory when also counting its full KV cache). Furthermore, because the Key and Value vectors share identical dimensional size, the bump-pointer allocator prevents Python level branching and conditional overhead.
+
+   <br> <br>
+
+   Here is a snippet of the code for how it works:
+ </p>
+
+
+ <pre class="bg-slate-50 p-4 mb-10 whitespace-pre-wrap break-words font-mono text-sm border border-black leading-relaxed shadow-sm"><code class="language-python">from transformers import AutoModelForCausalLM
+from static_cache import StaticLinearKVCache
+
+model = AutoModelForCausalLM.from_pretrained("Qwen/Qwen2.5-1.5B-Instruct")
+
+# 1. Pre-allocate the contiguous memory runway
+static_cache = StaticLinearKVCache(
+ config=model.config, # this stores the important information about the model, including number of layers, kv heads, head dimension. These number are used to figure out how much VRAM a token requires.
+ max_batch_size=1, # this is the number of different context windows that need to be allocated. If there are 4 people using the same thing at the same time, the max_batch size would be 4 (4 times the total space required for a single person so they all get their own memory block)
+ max_context_length=2048, # this is set by the user, which takes the required amount of memory required. For example, if the model had a context window of N, you would put N here and it would allocate enough space for exactly N tokens.
+ device=model.device, # the GPU
+ dtype=model.dtype # the data type precision that every number takes up in memory. The model used uses bfloat16, so it uses this figure to calculate how much memory is required.
+)
+
+# 2. Generate tokens with zero dynamic allocations
+outputs = model.generate(
+ **inputs, # This is where the first prompt is provided
+ past_key_values=static_cache, # This tells the model to use the static_cache. By default, this uses the native Pytorch "torch.cat" memory allocation which leads to memory fragmentation
+ use_cache=True # Use the KV cache so it doesn't continuously use the transformer model to compute attention on all previous KV vectors for every single Q vector.
+)</code></pre>
+
+ <h2 id="paged-attention" class="font-serif text-3xl font-bold border-b border-black pb-2 scroll-mt-24 mt-12 mb-6">3. PagedAttention vs. Contiguous Memory</h2>
+ 
+ <p>Production environments in real servers (e.g. ChatGPT and other model providers) use PagedAttention to solve fragmentation. PagedAttention splits the KV cache into non-contiguous chunks allocated dynamically, allowing dozens of concurrent users to share a GPU without pre-allocating massive blocks per user. Essentially, instead of allocating the entire context window of the model at once, a small chunk is allocated every time it is required.
+
+   <br> <br>
+
+   PagedAttention introduces pointer-chasing overhead to map these scattered memory blocks. For local inference or research prototyping (1-4 users), a Static Linear Arena would provide better performance.  However, because the static linear arena is implemented to subclass Pytorch, I still have to deal with some of the Python overhead, which will slow it down considerably when compared to a completely C++/CUDA program for memory allocation.</p>
+
+ <h2 id="context" class="font-serif text-3xl font-bold border-b border-black pb-2 scroll-mt-24 mt-12 mb-6">4. Context and Intended Use</h2>
+
+ <p>  Originally, this was meant so I would have more experience in dealing with memory at a lower level so I would be able to create a zero-copy static arena allocator for my Compoxel project. However, there are legitimate uses for this program. This memory interface is designed to speed up output and improve memory utilization when prototyping LLM inference natively in PyTorch before moving to production.
+
+<br><br>
+   Here are the environments that it is not meant for: </p>
+
+ <ul>
+ <li><strong>Commercial Deployment (vLLM):</strong> For production servers that have to serve many users without using too much compute, the vLLM method is better. It allows them to not use as much memory per user, at the cost of slightly more latency per token.</li>
+ <li><strong>Home Deployment (Ollama):</strong> For standard local use, Ollama does something very similar, except it is implemented completely in C++, allowing it to be much faster than a program written in Python which also has to deal with Pytorch overhead.</li>
+ </ul>
+ </article>
+ </div>
+ </main>
+
+ <footer class="border-t border-black mt-12">
+ <a href="#" class="block w-full bg-white hover:bg-slate-50 transition-colors py-8 group cursor-pointer">
+ <div class="max-w-7xl mx-auto px-6 text-center">
+ <span class="font-mono text-sm font-bold group-hover:underline ">&uarr; Back to Top</span>
+ </div>
+ </a>
+ </footer>
+ <script>
+ localStorage.setItem('visited_memory_interface', 'true');
+ </script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>\n <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>\n
+ <!-- Telemetry Script -->
+ <script>
+ document.addEventListener("DOMContentLoaded", () => {
+ const container = document.getElementById("telemetry-container");
+ if (!container) return;
+ 
+ const slug = container.getAttribute("data-project-slug");
+ 
+ fetch("../assets/data/telemetry.json")
+ .then(response => response.json())
+ .then(data => {
+ const project = data.telemetry && data.telemetry[slug];
+ const content = document.getElementById("telemetry-content");
+ 
+ if (!project) {
+ content.innerHTML = '<span class="font-mono text-sm text-slate-500">Not on TaskTracker</span>';
+ return;
+ }
+ 
+ let colorClass = "text-slate-700";
+ if (project.severity === "success") colorClass = "text-green-700";
+ if (project.severity === "warning") colorClass = "text-amber-700";
+ 
+ content.innerHTML = `
+ <div class="flex flex-col">
+ <div class="whitespace-nowrap">
+ <a href="https://task-tracker-web.fly.dev/?project=${slug}" target="_blank" class="font-mono text-sm font-bold hover:underline ${colorClass}">${project.status_badge} &nearr;</a>
+ <span class="font-mono text-sm text-black ml-1">(${project.tasks_completed}/${project.tasks_total})</span>
+ </div>
+ <div class="font-mono text-[10px] text-black truncate max-w-[200px]" title="${project.active_task}">&gt; ${project.active_task}</div>
+ </div>
+ `;
+ })
+ .catch(err => {
+ const content = document.getElementById("telemetry-content");
+ if (content) content.innerHTML = '<span class="font-mono text-sm text-slate-500">Not on TaskTracker</span>';
+ });
+ });
+ </script>
+
+ <!-- D3.js Graph Logic -->
+ <script src="https://d3js.org/d3.v7.min.js"></script>
+ <script>
+ document.addEventListener("DOMContentLoaded", () => {
+ const container = document.getElementById('graph-container');
+ if (!container) return;
+
+ const telemetryContainer = document.getElementById("telemetry-container");
+ const currentProjectSlug = telemetryContainer ? telemetryContainer.getAttribute("data-project-slug") : "";
+
+ const nodes = [
+ { id: "Projects", url: "../projects.html", isCentral: true }, // Central Node
+ { id: "SmallSat Paper", url: "smallsat_paper.html", visitedKey: "visited_smallsat_paper", slug: "smallsat_paper" },
+ { id: "Hyperspectral VAE", url: "utat_vae.html", visitedKey: "visited_utat_vae", slug: "utat_vae" },
+ { id: "Memory Interface", url: "memory_interface.html", visitedKey: "visited_memory_interface", slug: "memory_interface" },
+ { id: "Wing Optimizer", url: "propeller_optimizer.html", visitedKey: "visited_propeller_optimizer", slug: "propeller_optimizer" },
+ { id: "Timmy and Tommy", url: "timmy_and_tommy.html", visitedKey: "visited_timmy_and_tommy", slug: "timmy_and_tommy" },
+ { id: "Compoxel", url: "compoxel.html", visitedKey: "visited_compoxel", slug: "compoxel" },
+ { id: "BioNERBERT", url: "bionerbert.html", visitedKey: "visited_bionerbert", slug: "bionerbert" },
+ { id: "Macropad", url: "macropad.html", visitedKey: "visited_macropad", slug: "macropad" }
+ ];
+
+ const links = [
+ { source: "Projects", target: "SmallSat Paper" },
+ { source: "Projects", target: "Hyperspectral VAE" },
+ { source: "Projects", target: "Memory Interface" },
+ { source: "Projects", target: "Wing Optimizer" },
+ { source: "Projects", target: "Timmy and Tommy" },
+ { source: "Projects", target: "Compoxel" },
+ { source: "Projects", target: "BioNERBERT" },
+ { source: "Projects", target: "Macropad" }
+ ];
+
+ let width = container.clientWidth;
+ let height = container.clientHeight;
+
+ const svg = d3.select("#graph-container").append("svg")
+ .attr("width", width)
+ .attr("height", height);
+
+ const simulation = d3.forceSimulation(nodes)
+ .force("link", d3.forceLink(links).id(d => d.id).distance(60))
+ .force("charge", d3.forceManyBody().strength(-150))
+ .force("center", d3.forceCenter(width / 2, height / 2))
+ .force("collide", d3.forceCollide().radius(d => d.isCentral ? 25 : 15));
+
+ const link = svg.append("g")
+ .selectAll("line")
+ .data(links)
+ .enter().append("line")
+ .attr("class", "link")
+ .attr("stroke", "#ccc")
+ .attr("stroke-width", 1.5);
+
+ const nodeGroup = svg.append("g")
+ .selectAll("g")
+ .data(nodes)
+ .enter().append("g")
+ .attr("class", "node-group")
+ .style("cursor", "pointer")
+ .call(d3.drag()
+ .on("start", dragstarted)
+ .on("drag", dragged)
+ .on("end", dragended))
+ .on("click", (event, d) => {
+ if (d.url !== "#") {
+ window.location.href = d.url;
+ }
+ })
+ .on("mouseover", (event, d) => {
+ const tooltip = d3.select("#tooltip");
+ tooltip.html(d.id)
+ .style("left", (event.clientX + 10) + "px")
+ .style("top", (event.clientY - 20) + "px")
+ .style("opacity", 1);
+ })
+ .on("mousemove", (event) => {
+ d3.select("#tooltip")
+ .style("left", (event.clientX + 10) + "px")
+ .style("top", (event.clientY - 20) + "px");
+ })
+ .on("mouseout", () => {
+ d3.select("#tooltip").style("opacity", 0);
+ });
+
+ // Active node background highlight (Outer ring)
+ nodeGroup.filter(d => d.slug === currentProjectSlug)
+ .append("circle")
+ .attr("r", 13.5)
+ .attr("fill", "black");
+
+ // Main node circle
+ nodeGroup.append("circle")
+ .attr("r", d => d.isCentral ? 20 : 10)
+ .attr("fill", d => {
+ if (d.isCentral) return "#f1f5f9";
+ if (d.slug === currentProjectSlug) return "black";
+ return localStorage.getItem(d.visitedKey) ? "black" : "white";
+ })
+ .attr("stroke", d => {
+ if (d.isCentral) return "black";
+ if (d.slug === currentProjectSlug) return "white";
+ return "black";
+ })
+ .attr("stroke-width", d => {
+ if (d.isCentral) return 2;
+ if (d.slug === currentProjectSlug) return 3;
+ return 2;
+ });
+
+ // Central node label
+ svg.append("g")
+ .selectAll("text")
+ .data(nodes.filter(d => d.isCentral))
+ .enter().append("text")
+ .text(d => d.id)
+ .attr("text-anchor", "middle")
+ .attr("dy", ".3em")
+ .attr("font-family", "JetBrains Mono")
+ .attr("font-size", "8px")
+ .attr("font-weight", "bold")
+ .attr("fill", "black")
+ .style("pointer-events", "none");
+
+ simulation.on("tick", () => {
+ nodeGroup.attr("transform", d => {
+ d.x = Math.max(20, Math.min(width - 20, d.x));
+ d.y = Math.max(20, Math.min(height - 20, d.y));
+ return `translate(${d.x},${d.y})`;
+ });
+ link.attr("x1", d => d.source.x)
+ .attr("y1", d => d.source.y)
+ .attr("x2", d => d.target.x)
+ .attr("y2", d => d.target.y);
+ svg.selectAll("text")
+ .attr("x", d => d.x)
+ .attr("y", d => d.y);
+ });
+
+ function dragstarted(event, d) {
+ if (!event.active) simulation.alphaTarget(0.3).restart();
+ d.fx = d.x;
+ d.fy = d.y;
+ }
+ function dragged(event, d) {
+ d.fx = event.x;
+ d.fy = event.y;
+ }
+ function dragended(event, d) {
+ if (!event.active) simulation.alphaTarget(0);
+ d.fx = null;
+ d.fy = null;
+ }
+
+ window.addEventListener('resize', () => {
+ width = container.clientWidth;
+ height = container.clientHeight;
+ svg.attr("width", width).attr("height", height);
+ simulation.force("center", d3.forceCenter(width / 2, height / 2));
+ simulation.alpha(0.3).restart();
+ });
+ });
+ </script>
+
+
+ <!-- Mermaid JS -->
+ <script type="module">
+ import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+ mermaid.initialize({ 
+ startOnLoad: true, 
+ theme: 'neutral',
+ flowchart: { useMaxWidth: false }
+ });
+ 
+ // Add drag-to-scroll functionality
+ window.addEventListener('load', () => {
+ setTimeout(() => {
+ document.querySelectorAll('.mermaid').forEach(container => {
+ container.style.cursor = 'grab';
+ let isDown = false;
+ let startX, startY, scrollLeft, scrollTop;
+
+ container.addEventListener('mousedown', (e) => {
+ isDown = true;
+ container.style.cursor = 'grabbing';
+ startX = e.pageX - container.offsetLeft;
+ startY = e.pageY - container.offsetTop;
+ scrollLeft = container.scrollLeft;
+ scrollTop = container.scrollTop;
+ });
+ container.addEventListener('mouseleave', () => {
+ isDown = false;
+ container.style.cursor = 'grab';
+ });
+ container.addEventListener('mouseup', () => {
+ isDown = false;
+ container.style.cursor = 'grab';
+ });
+ container.addEventListener('mousemove', (e) => {
+ if (!isDown) return;
+ e.preventDefault();
+ const x = e.pageX - container.offsetLeft;
+ const y = e.pageY - container.offsetTop;
+ const walkX = (x - startX) * 1.5;
+ const walkY = (y - startY) * 1.5;
+ container.scrollLeft = scrollLeft - walkX;
+ container.scrollTop = scrollTop - walkY;
+ });
+ });
+ }, 500);
+ });
+ </script>
+</body>
+
+</html>

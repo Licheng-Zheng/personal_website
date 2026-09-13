@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Licheng Zheng | Academic Research Dashboard</title>
+
+    <!-- Google Fonts Import -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind CSS (CDN for single-file deployment) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class', // Disables automatic dark mode based on OS preference
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Enforce Light Mode at the browser level */
+        :root {
+            color-scheme: light;
+        }
+
+        /* Stark text selection color */
+        ::selection {
+            background-color: black;
+            color: white;
+        }
+    </style>
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+</head>
+
+<body class="bg-white text-black font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-white border-b border-black w-full px-6 py-4">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <a href="index.html" class="font-serif font-bold text-xl tracking-tight hover:underline block">
+                L. Zheng
+            </a>
+            <!-- Links -->
+            <div class="flex flex-wrap justify-center gap-6">
+                <a href="index.html"
+                    class="font-mono text-sm text-black hover:underline hover:font-bold transition-all underline font-bold">Home</a>
+                <a href="projects.html"
+                    class="font-mono text-sm text-black hover:underline hover:font-bold transition-all">Projects</a>
+                <!-- Future Migration:
+ <a href="ml_compute.html" class="font-mono text-sm text-black hover:underline hover:font-bold transition-all">ML and Compute</a>
+ <a href="complex_systems.html" class="font-mono text-sm text-black hover:underline hover:font-bold transition-all">Systems and Hardware</a>
+ <a href="hardware_misc.html" class="font-mono text-sm text-black hover:underline hover:font-bold transition-all">Hardware and Misc</a>
+ -->
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-6xl mx-auto w-full px-6 py-12 md:py-20">
+
+        <!-- Hero Section -->
+        <section class="grid grid-cols-1 md:grid-cols-12 gap-12 items-center mb-20">
+
+            <!-- Text Content -->
+            <div class="md:col-span-8 flex flex-col items-start">
+                <h1 class="font-serif text-5xl md:text-7xl font-bold tracking-tight leading-none mb-6">
+                    Licheng Zheng
+                </h1>
+                <p
+                    class="font-mono text-lg md:text-xl text-slate-700 leading-relaxed mb-8 border-l-4 border-black pl-4">
+                    Computer Science Co-Op @ UTSC | Can we do it? Yes we can!
+                </p>
+                <div class="flex flex-wrap items-center gap-4 mb-6">
+                    <a href="resume.html" target="_blank" rel="noopener noreferrer"
+                        class="inline-block border border-black bg-white text-black px-8 py-3 font-mono text-sm hover:bg-black hover:text-white transition-colors duration-200">
+                        Download Resume [.pdf]
+                    </a>
+                    <a href="https://github.com/Licheng-Zheng" target="_blank" rel="noopener noreferrer"
+                        class="inline-block border border-black text-black px-8 py-3 font-mono text-sm hover:bg-slate-50 transition-colors duration-200">
+                        GitHub &nearr;
+                    </a>
+                    <a href="https://www.linkedin.com/in/licheng-zheng-449248290/" target="_blank"
+                        rel="noopener noreferrer"
+                        class="inline-block border border-black text-black px-8 py-3 font-mono text-sm hover:bg-slate-50 transition-colors duration-200">
+                        LinkedIn &nearr;
+                    </a>
+                </div>
+                <a href="https://task-tracker-web.fly.dev/" target="_blank" rel="noopener noreferrer"
+                    class="inline-flex items-center font-mono text-sm text-black font-bold group underline decoration-slate-300 decoration-2 underline-offset-4 hover:decoration-black transition-colors">
+                    <span>See what I'm up to &rarr;</span>
+                </a>
+            </div>
+
+            <!-- Image Content (LaTeX Style) -->
+            <div class="md:col-span-4 w-full max-w-sm mx-auto md:max-w-none">
+                <figure class="w-full">
+                    <!-- Placeholder image: Using a solid gray box for starkness, replace src with actual image -->
+                    <img src="https://via.placeholder.com/400x500.png?text=Headshot+Placeholder"
+                        alt="Licheng Zheng Headshot"
+                        class="w-full h-auto aspect-[4/5] object-cover border border-black shadow-none rounded-none grayscale">
+                </figure>
+            </div>
+        </section>
+
+
+
+        <!-- About Me Section -->
+        <section id="about" class="grid grid-cols-1 md:grid-cols-12 gap-8">
+            <div class="md:col-span-3">
+                <h2 class="font-serif text-2xl font-bold tracking-tight sticky top-24">
+                    About Me
+                </h2>
+                <span class="font-mono text-xs text-slate-500 mt-1 block">Context and Background</span>
+            </div>
+
+            <div class="md:col-span-9 font-sans text-lg text-black leading-relaxed space-y-6">
+                <p>
+                    I am a second-year Computer Science Co-op student at the University of Toronto Scarborough. I am
+                    deeply interested in artificial intelligence and the hardware that powers it—it never ceases to
+                    amaze me that a model I built can learn to solve a problem I never learned to solve myself.
+
+                </p>
+                <p>
+                    I thrive on working within strict constraints. Whether I am squeezing performance out of limited
+                    VRAM, or training models on scarce data for the University of Toronto Aerospace Team, I love finding
+                    the creative, low-level solutions that unlimited resources would otherwise let me ignore.
+                </p>
+            </div>
+        </section>
+
+        <!-- Divider -->
+        <hr class="border-t border-black mt-16 mb-24">
+
+        <!-- Portfolio Showcase -->
+        <section class="mb-16">
+            <div class="mb-6">
+                <h2 class="font-serif text-3xl md:text-4xl font-bold tracking-tight">
+                    Project Showcase
+                </h2>
+                <span class="font-mono text-xs text-slate-500 mt-4 block">Some of the projects that I've been working
+                    on</span>
+            </div>
+
+            <!-- Dense Media Masonry / Bento Box -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-px bg-black border border-black p-px">
+                <!-- Large Feature Block -->
+                <a href="project_pages/compoxel.html"
+                    class="md:col-span-2 md:row-span-2 bg-white relative group overflow-hidden flex items-center justify-center aspect-video md:aspect-auto border border-transparent hover:border-black transition-all">
+                    <img src="assets/images/thumbnails/simulation_demo.webp" alt="Featured Simulation"
+                        class="absolute inset-0 w-full h-full object-cover">
+                    <div
+                        class="absolute inset-x-0 bottom-0 bg-black p-4 transform translate-y-0 md:translate-y-full group-hover:translate-y-0 transition-transform duration-200 ease-out flex flex-col z-20">
+                        <h4
+                            class="font-serif font-bold text-lg leading-tight mb-1 text-white underline decoration-2 underline-offset-4">
+                            Compoxel N-Body Gravity Engine</h4>
+                        <p class="font-mono text-xs text-slate-300 leading-relaxed">A high-performance, massively
+                            parallel N-body gravity engine built in pure C++ and CUDA that scales to simulate over 10
+                            million entities entirely in VRAM.</p>
+                    </div>
+                </a>
+
+                <!-- Small Block 1 -->
+                <a href="project_pages/macropad.html"
+                    class="bg-white relative group overflow-hidden flex items-center justify-center aspect-square border border-transparent hover:border-black transition-all">
+                    <img src="assets/images/thumbnails/hardware_render.webp" alt="CAD Render"
+                        class="absolute inset-0 w-full h-full object-cover">
+                    <div
+                        class="absolute inset-x-0 bottom-0 bg-black p-3 transform translate-y-0 md:translate-y-full group-hover:translate-y-0 transition-transform duration-200 ease-out flex flex-col z-20">
+                        <h4
+                            class="font-serif font-bold text-base leading-tight mb-1 text-white underline decoration-2 underline-offset-4">
+                            Custom 9-Key Hardware Macropad</h4>
+                        <p class="font-mono text-[10px] text-slate-300 leading-normal">A custom mechanical macropad with
+                            an OLED display that functions as a hardware-level 'Rubber Ducky' via USB HID.</p>
+                    </div>
+                </a>
+
+                <!-- Small Block 2 -->
+                <a href="project_pages/propeller_optimizer.html" target="_blank" rel="noopener noreferrer"
+                    class="bg-white relative group overflow-hidden flex items-center justify-center aspect-square border border-transparent hover:border-black transition-all">
+                    <img src="assets/images/thumbnails/performance_plot.webp" alt="Data Plot"
+                        class="absolute inset-0 w-full h-full object-cover">
+                    <div
+                        class="absolute inset-x-0 bottom-0 bg-black p-3 transform translate-y-0 md:translate-y-full group-hover:translate-y-0 transition-transform duration-200 ease-out flex flex-col z-20">
+                        <h4
+                            class="font-serif font-bold text-base leading-tight mb-1 text-white underline decoration-2 underline-offset-4">
+                            Wing and Propeller Optimizer</h4>
+                        <p class="font-mono text-[10px] text-slate-300 leading-normal">An automated optimization
+                            pipeline for high-efficiency airfoils utilizing multiprocessing and NeuralFoil evaluations.
+                        </p>
+                    </div>
+                </a>
+
+                <!-- Second Row Nested Grid -->
+                <div class="md:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-px bg-black">
+                    <!-- BioNERBERT Square -->
+                    <a href="project_pages/bionerbert.html"
+                        class="bg-white relative group overflow-hidden flex items-center justify-center aspect-square border border-transparent hover:border-black transition-all">
+                        <img src="assets/images/thumbnails/bionerbert_thumb.webp" alt="BioNERBERT"
+                            class="absolute inset-0 w-full h-full object-cover">
+                        <div
+                            class="absolute inset-x-0 bottom-0 bg-black p-3 transform translate-y-0 md:translate-y-full group-hover:translate-y-0 transition-transform duration-200 ease-out flex flex-col z-20">
+                            <h4
+                                class="font-serif font-bold text-base leading-tight mb-1 text-white underline decoration-2 underline-offset-4">
+                                BioNERBERT Inference Pipeline</h4>
+                            <p class="font-mono text-[10px] text-slate-300 leading-normal">A containerized, serverless
+                                inference pipeline deployed on Google Cloud Run for a custom Biomedical Named Entity
+                                Recognition (NER) model.</p>
+                        </div>
+                    </a>
+
+                    <!-- Timmy and Tommy Square -->
+                    <a href="project_pages/timmy_and_tommy.html"
+                        class="bg-white relative group overflow-hidden flex items-center justify-center aspect-square border border-transparent hover:border-black transition-all">
+                        <img src="assets/images/thumbnails/timmy_thumb.webp" alt="Timmy and Tommy"
+                            class="absolute inset-0 w-full h-full object-cover">
+                        <div
+                            class="absolute inset-x-0 bottom-0 bg-black p-3 transform translate-y-0 md:translate-y-full group-hover:translate-y-0 transition-transform duration-200 ease-out flex flex-col z-20">
+                            <h4
+                                class="font-serif font-bold text-base leading-tight mb-1 text-white underline decoration-2 underline-offset-4">
+                                Timmy and Tommy Cognitive Architecture</h4>
+                            <p class="font-mono text-[10px] text-slate-300 leading-normal">Retrieval-augmented
+                                generation (RAG) research assistants integrating recurrent neural networks (RNNs) for
+                                persona classification.</p>
+                        </div>
+                    </a>
+
+                    <!-- UTAT VAE Square -->
+                    <a href="project_pages/utat_vae.html"
+                        class="bg-white relative group overflow-hidden flex items-center justify-center aspect-square border border-transparent hover:border-black transition-all">
+                        <img src="assets/images/thumbnails/vae_thumb.webp" alt="Hyperspectral VAE"
+                            class="absolute inset-0 w-full h-full object-cover">
+                        <div
+                            class="absolute inset-x-0 bottom-0 bg-black p-3 transform translate-y-0 md:translate-y-full group-hover:translate-y-0 transition-transform duration-200 ease-out flex flex-col z-20">
+                            <h4
+                                class="font-serif font-bold text-base leading-tight mb-1 text-white underline decoration-2 underline-offset-4">
+                                Hyperspectral VAE</h4>
+                            <p class="font-mono text-[10px] text-slate-300 leading-normal">A Variational Autoencoder
+                                designed for hyperspectral data distribution compression, utilizing combined MSE and KL
+                                Divergence loss.</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Divider -->
+        <hr class="border-t border-black my-16">
+
+        <!-- Publications and Highlights -->
+        <section id="publications" class="grid grid-cols-1 md:grid-cols-12 gap-8 mb-16">
+            <div class="md:col-span-3">
+                <h2 class="font-serif text-2xl font-bold tracking-tight sticky top-24">
+                    Publications and Highlights
+                </h2>
+                <span class="font-mono text-xs text-slate-500 mt-1 block">Papers and past work</span>
+            </div>
+
+            <div class="md:col-span-9 space-y-6">
+                <!-- Highlight 1: SmallSat Paper -->
+                <a href="project_pages/smallsat_paper.html"
+                    class="block border border-black p-6 bg-slate-50 hover:bg-white hover:shadow-[2px_2px_0px_0px_#e2e8f0] hover:-translate-x-[2px] hover:-translate-y-[2px] transition-all duration-75 group cursor-pointer relative">
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-start mb-3 gap-2">
+                        <h3 class="font-serif font-bold text-xl group-hover:underline pr-4">Metadata-Conditioned
+                            Dark-Frame Modelling and HSDR-ScanFusion Denoising</h3>
+                        <span
+                            class="font-mono text-[10px] text-slate-500 bg-white border border-slate-300 px-2 py-1 whitespace-nowrap">Paper
+                            (4th Author)</span>
+                    </div>
+                    <p class="font-sans text-sm text-slate-700 mb-4 leading-relaxed">Accepted for publication and
+                        presentation at
+                        the 40th annual SmallSat Conference, held in Salt Lake City, Utah. A model created by the UTAT
+                        Data Processing Team to get significant hyperspectral orbital data denoising even when working
+                        with limited data.
+                    </p>
+                    <span class="font-mono text-xs text-black font-bold group-hover:underline">Read Deep Dive
+                        &rarr;</span>
+                </a>
+            </div>
+        </section>
+
+
+
+    </main>
+
+    <!-- Floating Tech Tree Graph (Commented out per request to move to projects.html)
+ <div id="techTreeGraph" class="fixed bottom-8 right-8 z-50 bg-white border border-black p-4 shadow-none hidden lg:block hover:shadow-xl transition-shadow">
+ <h3 class="font-mono text-[10px] font-bold border-b border-black pb-1 mb-3 text-center">Research Nodes</h3>
+ <div class="relative w-48 h-48">
+ <svg class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: 0;">
+ <line x1="15%" y1="15%" x2="15%" y2="50%" stroke="black" stroke-width="2"/>
+ <line x1="50%" y1="15%" x2="50%" y2="50%" stroke="black" stroke-width="2"/>
+ <line x1="85%" y1="15%" x2="85%" y2="50%" stroke="black" stroke-width="2"/>
+ <line x1="15%" y1="50%" x2="50%" y2="50%" stroke="black" stroke-width="2"/>
+ <line x1="85%" y1="50%" x2="50%" y2="50%" stroke="black" stroke-width="2"/>
+ <line x1="50%" y1="50%" x2="50%" y2="85%" stroke="black" stroke-width="2"/>
+ </svg>
+ 
+ <a href="project_pages/memory_interface.html" id="node-memory" class="absolute top-[15%] left-[15%] -translate-x-1/2 -translate-y-1/2 w-6 h-6 border-2 border-black bg-white hover:bg-slate-200 transition-colors z-10" title="Memory Interface"></a>
+ <a href="project_pages/propeller_optimizer.html" id="node-propeller" class="absolute top-[15%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-6 h-6 border-2 border-black bg-white hover:bg-slate-200 transition-colors z-10" title="Wing Optimizer"></a>
+ <a href="project_pages/compoxel.html" id="node-compoxel" class="absolute top-[15%] left-[85%] -translate-x-1/2 -translate-y-1/2 w-6 h-6 border-2 border-black bg-white hover:bg-slate-200 transition-colors z-10" title="Compoxel"></a>
+ 
+ <a href="project_pages/timmy_and_tommy.html" id="node-timmy" class="absolute top-[50%] left-[15%] -translate-x-1/2 -translate-y-1/2 w-6 h-6 border-2 border-black bg-white hover:bg-slate-200 transition-colors z-10" title="Timmy and Tommy"></a>
+ <a href="project_pages/bionerbert.html" id="node-bionerbert" class="absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-6 h-6 border-2 border-black bg-white hover:bg-slate-200 transition-colors z-10" title="BioNERBERT"></a>
+ <a href="project_pages/macropad.html" id="node-macropad" class="absolute top-[50%] left-[85%] -translate-x-1/2 -translate-y-1/2 w-6 h-6 border-2 border-black bg-white hover:bg-slate-200 transition-colors z-10" title="Macropad"></a>
+ 
+ <a href="complex_systems.html#simsoc" id="node-simsoc" class="absolute top-[85%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-6 h-6 border-2 border-black bg-white hover:bg-slate-200 transition-colors z-10" title="Simsoc (In Dev)"></a>
+ </div>
+ </div>
+ <script>
+ document.addEventListener('DOMContentLoaded', () => {
+ const visitedMemory = localStorage.getItem('visited_memory_interface');
+ const visitedPropeller = localStorage.getItem('visited_propeller_optimizer');
+ const visitedCompoxel = localStorage.getItem('visited_compoxel');
+ const visitedTimmy = localStorage.getItem('visited_timmy_and_tommy');
+ const visitedBionerbert = localStorage.getItem('visited_bionerbert');
+ const visitedMacropad = localStorage.getItem('visited_macropad');
+ 
+ if(visitedMemory) document.getElementById('node-memory').classList.add('bg-black');
+ if(visitedPropeller) document.getElementById('node-propeller').classList.add('bg-black');
+ if(visitedCompoxel) document.getElementById('node-compoxel').classList.add('bg-black');
+ if(visitedTimmy) document.getElementById('node-timmy').classList.add('bg-black');
+ if(visitedBionerbert) document.getElementById('node-bionerbert').classList.add('bg-black');
+ if(visitedMacropad) document.getElementById('node-macropad').classList.add('bg-black');
+ });
+ </script>
+ -->
+
+    <!-- Footer -->
+    <footer class="border-t border-black bg-white py-8 mt-12">
+        <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p class="font-mono text-xs text-slate-500">
+                &copy; <script>document.write(new Date().getFullYear())</script> Licheng Zheng.
+            </p>
+            <div class="flex items-center gap-4">
+                <a href="mailto:licheng.zheng@mail.utoronto.ca" class="font-mono text-xs text-black hover:underline hover:font-bold transition-all">Email</a>
+                <a href="https://github.com/Licheng-Zheng" target="_blank" rel="noopener noreferrer" class="font-mono text-xs text-black hover:underline hover:font-bold transition-all">GitHub</a>
+                <a href="https://www.linkedin.com/in/licheng-zheng-449248290/" target="_blank" rel="noopener noreferrer" class="font-mono text-xs text-black hover:underline hover:font-bold transition-all">LinkedIn</a>
+            </div>
+        </div>
+    </footer>
+
+</body>
+
+</html>
