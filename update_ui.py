@@ -3,7 +3,7 @@ import re
 import glob
 
 # Paths
-base_dir = r"c:\Users\liche\OneDrive\Desktop\PycharmProjects\Personal_Website"
+base_dir = "."
 root_htmls = [os.path.join(base_dir, "index.html"), os.path.join(base_dir, "projects.html")]
 project_htmls = glob.glob(os.path.join(base_dir, "project_pages", "*.html"))
 
@@ -35,11 +35,8 @@ hero_replacement = """<div class="flex flex-wrap items-center gap-4">
                     <a href="assets/documents/resume.pdf" target="_blank" rel="noopener noreferrer" class="inline-block border border-black bg-white text-black px-8 py-3 font-mono text-sm uppercase tracking-widest hover:bg-black hover:text-white transition-colors duration-200">
                         Download Resume [.pdf]
                     </a>
-                    <a href="https://github.com/yourusername" target="_blank" rel="noopener noreferrer" class="inline-block border border-black text-black px-8 py-3 font-mono text-sm uppercase tracking-widest hover:bg-slate-50 transition-colors duration-200">
+                    <a href="https://github.com/Licheng-Zheng" target="_blank" rel="noopener noreferrer" class="inline-block border border-black text-black px-8 py-3 font-mono text-sm uppercase tracking-widest hover:bg-slate-50 transition-colors duration-200">
                         GitHub &nearr;
-                    </a>
-                    <a href="https://linkedin.com/in/yourusername" target="_blank" rel="noopener noreferrer" class="inline-block border border-black text-black px-8 py-3 font-mono text-sm uppercase tracking-widest hover:bg-slate-50 transition-colors duration-200">
-                        LinkedIn &nearr;
                     </a>
                 </div>"""
 index_content = hero_pattern.sub(hero_replacement, index_content)
