@@ -1,6 +1,6 @@
 {
     "metadata": {
-        "export_timestamp": "2026-09-20T15:47:10.014402Z",
+        "export_timestamp": "2026-09-21T04:18:03.397597Z",
         "active_projects": 9
     },
     "telemetry": {
@@ -53,11 +53,11 @@
             "severity": "warning",
             "current_phase": "Software Projects",
             "active_task": "Write out how we can use it ",
-            "tasks_completed": 2,
+            "tasks_completed": 5,
             "tasks_total": 6,
-            "last_updated": "09/08/2026",
+            "last_updated": "09/21/2026",
             "metric_label": "Compute",
-            "metric_value": "2h"
+            "metric_value": "6h"
         },
         "personal_website": {
             "status_badge": "COMPLETED",
@@ -96,12 +96,12 @@
             "status_badge": "IN PROGRESS",
             "severity": "warning",
             "current_phase": "Academic",
-            "active_task": "Week 2: Homework",
-            "tasks_completed": 3,
-            "tasks_total": 41,
+            "active_task": "Week 3: Readings",
+            "tasks_completed": 4,
+            "tasks_total": 39,
             "last_updated": "11/27/2026",
             "metric_label": "Compute",
-            "metric_value": "5h"
+            "metric_value": "10h"
         }
     }
 }
