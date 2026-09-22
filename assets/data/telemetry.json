@@ -1,6 +1,6 @@
 {
     "metadata": {
-        "export_timestamp": "2026-09-22T04:13:54.735039Z",
+        "export_timestamp": "2026-09-22T16:39:22.626158Z",
         "active_projects": 9
     },
     "telemetry": {
@@ -49,15 +49,15 @@
             "metric_value": "1h"
         },
         "utat_stuff": {
-            "status_badge": "IN PROGRESS",
-            "severity": "warning",
+            "status_badge": "COMPLETED",
+            "severity": "success",
             "current_phase": "Software Projects",
             "active_task": "Write out how we can use it ",
-            "tasks_completed": 5,
+            "tasks_completed": 6,
             "tasks_total": 6,
-            "last_updated": "09/21/2026",
+            "last_updated": "09/22/2026",
             "metric_label": "Compute",
-            "metric_value": "6h"
+            "metric_value": "6.5h"
         },
         "personal_website": {
             "status_badge": "COMPLETED",
@@ -85,12 +85,12 @@
             "status_badge": "IN PROGRESS",
             "severity": "warning",
             "current_phase": "Academic",
-            "active_task": "Week 2: Problem Set / Homework",
-            "tasks_completed": 5,
+            "active_task": "Week 2: Review for Quiz",
+            "tasks_completed": 6,
             "tasks_total": 48,
-            "last_updated": "11/27/2026",
+            "last_updated": "12/01/2026",
             "metric_label": "Compute",
-            "metric_value": "12h"
+            "metric_value": "14.5h"
         },
         "cscb36": {
             "status_badge": "IN PROGRESS",
