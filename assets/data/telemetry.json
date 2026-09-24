@@ -1,6 +1,6 @@
 {
     "metadata": {
-        "export_timestamp": "2026-09-24T04:06:11.980168Z",
+        "export_timestamp": "2026-09-24T16:52:25.694499Z",
         "active_projects": 9
     },
     "telemetry": {
@@ -74,12 +74,12 @@
             "status_badge": "IN PROGRESS",
             "severity": "warning",
             "current_phase": "Academic",
-            "active_task": "Week 2: Problem Set / Homework",
-            "tasks_completed": 4,
-            "tasks_total": 36,
-            "last_updated": "11/27/2026",
+            "active_task": "Week 3: Readings",
+            "tasks_completed": 16,
+            "tasks_total": 96,
+            "last_updated": "11/29/2026",
             "metric_label": "Compute",
-            "metric_value": "10.5h"
+            "metric_value": "29h"
         },
         "stab52": {
             "status_badge": "IN PROGRESS",
@@ -96,12 +96,12 @@
             "status_badge": "IN PROGRESS",
             "severity": "warning",
             "current_phase": "Academic",
-            "active_task": "Week 2: Readings",
-            "tasks_completed": 3,
+            "active_task": "Week 3: Review for quiz",
+            "tasks_completed": 11,
             "tasks_total": 66,
             "last_updated": "11/28/2026",
             "metric_label": "Compute",
-            "metric_value": "3.5h"
+            "metric_value": "17h"
         }
     }
 }
