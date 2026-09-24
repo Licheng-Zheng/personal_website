@@ -1,6 +1,6 @@
 {
     "metadata": {
-        "export_timestamp": "2026-09-23T16:32:26.312962Z",
+        "export_timestamp": "2026-09-24T04:06:11.980168Z",
         "active_projects": 9
     },
     "telemetry": {
@@ -85,23 +85,23 @@
             "status_badge": "IN PROGRESS",
             "severity": "warning",
             "current_phase": "Academic",
-            "active_task": "Week 2: Review for Quiz",
-            "tasks_completed": 6,
-            "tasks_total": 48,
-            "last_updated": "12/01/2026",
+            "active_task": "Week 3: Problem Set / Homework",
+            "tasks_completed": 9,
+            "tasks_total": 66,
+            "last_updated": "11/28/2026",
             "metric_label": "Compute",
-            "metric_value": "14.5h"
+            "metric_value": "21h"
         },
         "cscb36": {
             "status_badge": "IN PROGRESS",
             "severity": "warning",
             "current_phase": "Academic",
-            "active_task": "Week 3: Readings",
-            "tasks_completed": 4,
-            "tasks_total": 39,
-            "last_updated": "11/27/2026",
+            "active_task": "Week 2: Readings",
+            "tasks_completed": 3,
+            "tasks_total": 66,
+            "last_updated": "11/28/2026",
             "metric_label": "Compute",
-            "metric_value": "10h"
+            "metric_value": "3.5h"
         }
     }
 }
