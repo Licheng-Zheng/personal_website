@@ -1,6 +1,6 @@
 {
     "metadata": {
-        "export_timestamp": "2026-09-30T17:50:57.070090Z",
+        "export_timestamp": "2026-10-01T05:10:32.996444Z",
         "active_projects": 9
     },
     "telemetry": {
@@ -30,12 +30,12 @@
             "status_badge": "IN PROGRESS",
             "severity": "warning",
             "current_phase": "Software Projects",
-            "active_task": "Research into anti-grid anisotropy methods",
-            "tasks_completed": 1,
+            "active_task": "Implement",
+            "tasks_completed": 2,
             "tasks_total": 4,
             "last_updated": "10/24/2026",
             "metric_label": "Compute",
-            "metric_value": "1h"
+            "metric_value": "4h"
         },
         "timmy_and_tommy": {
             "status_badge": "IN PROGRESS",
@@ -74,12 +74,12 @@
             "status_badge": "IN PROGRESS",
             "severity": "warning",
             "current_phase": "Academic",
-            "active_task": "Week 1: Review Slides for the week",
-            "tasks_completed": 3,
+            "active_task": "Week 1: Good copy Notes",
+            "tasks_completed": 5,
             "tasks_total": 48,
             "last_updated": "11/20/2026",
             "metric_label": "Compute",
-            "metric_value": "3h"
+            "metric_value": "7.5h"
         },
         "stab52": {
             "status_badge": "IN PROGRESS",
@@ -96,12 +96,12 @@
             "status_badge": "IN PROGRESS",
             "severity": "warning",
             "current_phase": "Academic",
-            "active_task": "Week 1: Pre-readings",
-            "tasks_completed": 0,
+            "active_task": "Week 1: Review for Quiz",
+            "tasks_completed": 4,
             "tasks_total": 56,
             "last_updated": "11/21/2026",
             "metric_label": "Compute",
-            "metric_value": "0h"
+            "metric_value": "4.5h"
         }
     }
 }
