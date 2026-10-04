@@ -1,6 +1,6 @@
 {
     "metadata": {
-        "export_timestamp": "2026-10-03T16:00:23.185283Z",
+        "export_timestamp": "2026-10-04T05:14:16.211141Z",
         "active_projects": 9
     },
     "telemetry": {
@@ -74,12 +74,12 @@
             "status_badge": "IN PROGRESS",
             "severity": "warning",
             "current_phase": "Academic",
-            "active_task": "Week 1: Good copy Notes",
-            "tasks_completed": 5,
-            "tasks_total": 48,
+            "active_task": "Week 2: Pre-readings",
+            "tasks_completed": 6,
+            "tasks_total": 49,
             "last_updated": "11/20/2026",
             "metric_label": "Compute",
-            "metric_value": "7.5h"
+            "metric_value": "9h"
         },
         "stab52": {
             "status_badge": "IN PROGRESS",
@@ -96,9 +96,9 @@
             "status_badge": "IN PROGRESS",
             "severity": "warning",
             "current_phase": "Academic",
-            "active_task": "Week 2: Problem Set: Complex",
+            "active_task": "Week 2: Pre-readings",
             "tasks_completed": 5,
-            "tasks_total": 56,
+            "tasks_total": 60,
             "last_updated": "11/21/2026",
             "metric_label": "Compute",
             "metric_value": "6h"
