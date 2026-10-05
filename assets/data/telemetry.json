@@ -1,6 +1,6 @@
 {
     "metadata": {
-        "export_timestamp": "2026-10-04T16:41:25.626732Z",
+        "export_timestamp": "2026-10-05T04:58:19.127667Z",
         "active_projects": 9
     },
     "telemetry": {
@@ -86,11 +86,11 @@
             "severity": "warning",
             "current_phase": "Academic",
             "active_task": "Week 2: Pre-readings",
-            "tasks_completed": 5,
+            "tasks_completed": 6,
             "tasks_total": 48,
             "last_updated": "11/21/2026",
             "metric_label": "Compute",
-            "metric_value": "6h"
+            "metric_value": "9.5h"
         },
         "cscb36": {
             "status_badge": "IN PROGRESS",
