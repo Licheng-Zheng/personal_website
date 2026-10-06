@@ -1,6 +1,6 @@
 {
     "metadata": {
-        "export_timestamp": "2026-10-05T04:58:19.127667Z",
+        "export_timestamp": "2026-10-06T05:46:02.829985Z",
         "active_projects": 9
     },
     "telemetry": {
@@ -74,12 +74,12 @@
             "status_badge": "IN PROGRESS",
             "severity": "warning",
             "current_phase": "Academic",
-            "active_task": "Week 2: Pre-readings",
-            "tasks_completed": 6,
+            "active_task": "Week 2: Review Slides for the week",
+            "tasks_completed": 9,
             "tasks_total": 49,
             "last_updated": "11/20/2026",
             "metric_label": "Compute",
-            "metric_value": "9h"
+            "metric_value": "12h"
         },
         "stab52": {
             "status_badge": "IN PROGRESS",
@@ -98,7 +98,7 @@
             "current_phase": "Academic",
             "active_task": "Week 2: Pre-readings",
             "tasks_completed": 5,
-            "tasks_total": 60,
+            "tasks_total": 61,
             "last_updated": "11/21/2026",
             "metric_label": "Compute",
             "metric_value": "6h"
