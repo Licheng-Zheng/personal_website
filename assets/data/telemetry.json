@@ -1,7 +1,7 @@
 {
     "metadata": {
-        "export_timestamp": "2026-10-10T05:15:03.325539Z",
-        "active_projects": 9
+        "export_timestamp": "2026-10-10T17:11:08.846403Z",
+        "active_projects": 10
     },
     "telemetry": {
         "macropad": {
@@ -102,6 +102,17 @@
             "last_updated": "11/21/2026",
             "metric_label": "Compute",
             "metric_value": "6h"
+        },
+        "fader_deck": {
+            "status_badge": "IN PROGRESS",
+            "severity": "warning",
+            "current_phase": "Hardware Projects",
+            "active_task": "Finalize Purchasing List ",
+            "tasks_completed": 0,
+            "tasks_total": 11,
+            "last_updated": "10/10/2026",
+            "metric_label": "Compute",
+            "metric_value": "0h"
         }
     }
 }
