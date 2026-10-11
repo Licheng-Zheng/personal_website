@@ -1,6 +1,6 @@
 {
     "metadata": {
-        "export_timestamp": "2026-10-11T05:05:29.671208Z",
+        "export_timestamp": "2026-10-11T17:33:39.588103Z",
         "active_projects": 10
     },
     "telemetry": {
@@ -85,34 +85,34 @@
             "status_badge": "IN PROGRESS",
             "severity": "warning",
             "current_phase": "Academic",
-            "active_task": "Week 2: Pre-readings",
-            "tasks_completed": 6,
+            "active_task": "Week 3: Pre-readings",
+            "tasks_completed": 11,
             "tasks_total": 48,
             "last_updated": "11/21/2026",
             "metric_label": "Compute",
-            "metric_value": "9.5h"
+            "metric_value": "15.5h"
         },
         "cscb36": {
             "status_badge": "IN PROGRESS",
             "severity": "warning",
             "current_phase": "Academic",
-            "active_task": "Week 2: Pre-readings",
-            "tasks_completed": 5,
+            "active_task": "Week 2: Note making ",
+            "tasks_completed": 8,
             "tasks_total": 61,
             "last_updated": "11/21/2026",
             "metric_label": "Compute",
-            "metric_value": "6h"
+            "metric_value": "9h"
         },
         "fader_deck": {
             "status_badge": "IN PROGRESS",
             "severity": "warning",
             "current_phase": "Hardware Projects",
-            "active_task": "Finalize Purchasing List ",
-            "tasks_completed": 0,
+            "active_task": "Modelling Top Plate",
+            "tasks_completed": 3,
             "tasks_total": 11,
-            "last_updated": "10/10/2026",
+            "last_updated": "10/11/2026",
             "metric_label": "Compute",
-            "metric_value": "0h"
+            "metric_value": "2h"
         }
     }
 }
