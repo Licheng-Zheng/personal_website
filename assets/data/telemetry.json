@@ -1,6 +1,6 @@
 {
     "metadata": {
-        "export_timestamp": "2026-10-16T16:23:33.864802Z",
+        "export_timestamp": "2026-10-17T03:48:54.238743Z",
         "active_projects": 10
     },
     "telemetry": {
@@ -74,45 +74,45 @@
             "status_badge": "IN PROGRESS",
             "severity": "warning",
             "current_phase": "Academic",
-            "active_task": "Week 2: Review Slides for the week",
-            "tasks_completed": 9,
+            "active_task": "Week 4: Pre-readings",
+            "tasks_completed": 19,
             "tasks_total": 49,
             "last_updated": "11/20/2026",
             "metric_label": "Compute",
-            "metric_value": "12h"
+            "metric_value": "28h"
         },
         "stab52": {
             "status_badge": "IN PROGRESS",
             "severity": "warning",
             "current_phase": "Academic",
-            "active_task": "Week 3: Pre-readings",
-            "tasks_completed": 11,
+            "active_task": "Week 3: Good copy Notes",
+            "tasks_completed": 16,
             "tasks_total": 48,
             "last_updated": "11/21/2026",
             "metric_label": "Compute",
-            "metric_value": "15.5h"
+            "metric_value": "23.5h"
         },
         "cscb36": {
             "status_badge": "IN PROGRESS",
             "severity": "warning",
             "current_phase": "Academic",
             "active_task": "Week 2: Note making ",
-            "tasks_completed": 8,
+            "tasks_completed": 9,
             "tasks_total": 61,
             "last_updated": "11/21/2026",
             "metric_label": "Compute",
-            "metric_value": "9h"
+            "metric_value": "10.5h"
         },
         "fader_deck": {
             "status_badge": "IN PROGRESS",
             "severity": "warning",
             "current_phase": "Hardware Projects",
-            "active_task": "Modelling Top Plate",
-            "tasks_completed": 3,
-            "tasks_total": 11,
-            "last_updated": "10/11/2026",
+            "active_task": "Modelling Bottom Wedge",
+            "tasks_completed": 4,
+            "tasks_total": 14,
+            "last_updated": "10/16/2026",
             "metric_label": "Compute",
-            "metric_value": "2h"
+            "metric_value": "8h"
         }
     }
 }
