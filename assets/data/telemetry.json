@@ -1,6 +1,6 @@
 {
     "metadata": {
-        "export_timestamp": "2026-10-17T15:17:59.896430Z",
+        "export_timestamp": "2026-10-18T03:55:25.413707Z",
         "active_projects": 10
     },
     "telemetry": {
@@ -85,34 +85,34 @@
             "status_badge": "IN PROGRESS",
             "severity": "warning",
             "current_phase": "Academic",
-            "active_task": "Week 3: Good copy Notes",
-            "tasks_completed": 16,
+            "active_task": "Week 4: Pre-readings",
+            "tasks_completed": 17,
             "tasks_total": 48,
             "last_updated": "11/21/2026",
             "metric_label": "Compute",
-            "metric_value": "23.5h"
+            "metric_value": "25h"
         },
         "cscb36": {
             "status_badge": "IN PROGRESS",
             "severity": "warning",
             "current_phase": "Academic",
-            "active_task": "Week 2: Note making ",
-            "tasks_completed": 9,
+            "active_task": "Week 3: Note making ",
+            "tasks_completed": 18,
             "tasks_total": 61,
             "last_updated": "11/21/2026",
             "metric_label": "Compute",
-            "metric_value": "10.5h"
+            "metric_value": "25h"
         },
         "fader_deck": {
             "status_badge": "IN PROGRESS",
             "severity": "warning",
             "current_phase": "Hardware Projects",
-            "active_task": "Modelling Bottom Wedge",
-            "tasks_completed": 4,
+            "active_task": "Soldering",
+            "tasks_completed": 5,
             "tasks_total": 14,
-            "last_updated": "10/16/2026",
+            "last_updated": "10/17/2026",
             "metric_label": "Compute",
-            "metric_value": "8h"
+            "metric_value": "8.5h"
         }
     }
 }
