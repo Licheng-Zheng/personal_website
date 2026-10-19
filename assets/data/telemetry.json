@@ -1,6 +1,6 @@
 {
     "metadata": {
-        "export_timestamp": "2026-10-19T04:04:19.167081Z",
+        "export_timestamp": "2026-10-19T18:34:38.530483Z",
         "active_projects": 11
     },
     "telemetry": {
@@ -74,12 +74,12 @@
             "status_badge": "IN PROGRESS",
             "severity": "warning",
             "current_phase": "Academic",
-            "active_task": "Week 4: Complete Homework",
-            "tasks_completed": 23,
+            "active_task": "Week 4: Good copy Notes",
+            "tasks_completed": 24,
             "tasks_total": 49,
             "last_updated": "11/20/2026",
             "metric_label": "Compute",
-            "metric_value": "32h"
+            "metric_value": "35.5h"
         },
         "stab52": {
             "status_badge": "IN PROGRESS",
