@@ -1,7 +1,7 @@
 {
     "metadata": {
-        "export_timestamp": "2026-10-18T15:39:20.835790Z",
-        "active_projects": 10
+        "export_timestamp": "2026-10-19T04:04:19.167081Z",
+        "active_projects": 11
     },
     "telemetry": {
         "macropad": {
@@ -74,23 +74,23 @@
             "status_badge": "IN PROGRESS",
             "severity": "warning",
             "current_phase": "Academic",
-            "active_task": "Week 4: Pre-readings",
-            "tasks_completed": 19,
+            "active_task": "Week 4: Complete Homework",
+            "tasks_completed": 23,
             "tasks_total": 49,
             "last_updated": "11/20/2026",
             "metric_label": "Compute",
-            "metric_value": "28h"
+            "metric_value": "32h"
         },
         "stab52": {
             "status_badge": "IN PROGRESS",
             "severity": "warning",
             "current_phase": "Academic",
             "active_task": "Week 4: Pre-readings",
-            "tasks_completed": 17,
+            "tasks_completed": 18,
             "tasks_total": 48,
             "last_updated": "11/21/2026",
             "metric_label": "Compute",
-            "metric_value": "25h"
+            "metric_value": "28.5h"
         },
         "cscb36": {
             "status_badge": "IN PROGRESS",
@@ -109,10 +109,21 @@
             "current_phase": "Hardware Projects",
             "active_task": "Soldering",
             "tasks_completed": 5,
-            "tasks_total": 14,
+            "tasks_total": 16,
             "last_updated": "10/17/2026",
             "metric_label": "Compute",
             "metric_value": "8.5h"
+        },
+        "simsoc": {
+            "status_badge": "PLANNING",
+            "severity": "neutral",
+            "current_phase": "Software Projects",
+            "active_task": "No tasks planned",
+            "tasks_completed": 0,
+            "tasks_total": 0,
+            "last_updated": "10/19/2026",
+            "metric_label": "Compute",
+            "metric_value": "0h"
         }
     }
 }
