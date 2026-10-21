@@ -1,7 +1,7 @@
 {
     "metadata": {
-        "export_timestamp": "2026-10-20T16:37:55.727393Z",
-        "active_projects": 11
+        "export_timestamp": "2026-10-21T04:05:46.759563Z",
+        "active_projects": 12
     },
     "telemetry": {
         "macropad": {
@@ -115,13 +115,24 @@
             "metric_value": "8.5h"
         },
         "simsoc": {
+            "status_badge": "PLANNING",
+            "severity": "neutral",
+            "current_phase": "Software Projects",
+            "active_task": "No tasks planned",
+            "tasks_completed": 0,
+            "tasks_total": 0,
+            "last_updated": "10/21/2026",
+            "metric_label": "Compute",
+            "metric_value": "0h"
+        },
+        "simcsoc": {
             "status_badge": "IN PROGRESS",
             "severity": "warning",
             "current_phase": "Software Projects",
-            "active_task": "Environment Setup ",
+            "active_task": "Task 0.1: Local Environment Setup",
             "tasks_completed": 0,
-            "tasks_total": 13,
-            "last_updated": "10/20/2026",
+            "tasks_total": 31,
+            "last_updated": "10/21/2026",
             "metric_label": "Compute",
             "metric_value": "0h"
         }
