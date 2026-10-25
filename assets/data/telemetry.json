@@ -1,7 +1,7 @@
 {
     "metadata": {
-        "export_timestamp": "2026-10-25T04:03:25.612114Z",
-        "active_projects": 12
+        "export_timestamp": "2026-10-25T15:51:17.723536Z",
+        "active_projects": 11
     },
     "telemetry": {
         "macropad": {
@@ -108,22 +108,11 @@
             "severity": "warning",
             "current_phase": "Hardware Projects",
             "active_task": "Soldering",
-            "tasks_completed": 5,
+            "tasks_completed": 8,
             "tasks_total": 16,
-            "last_updated": "10/17/2026",
-            "metric_label": "Compute",
-            "metric_value": "8.5h"
-        },
-        "simsoc": {
-            "status_badge": "PLANNING",
-            "severity": "neutral",
-            "current_phase": "Software Projects",
-            "active_task": "No tasks planned",
-            "tasks_completed": 0,
-            "tasks_total": 0,
             "last_updated": "10/25/2026",
             "metric_label": "Compute",
-            "metric_value": "0h"
+            "metric_value": "10.5h"
         },
         "simcsoc": {
             "status_badge": "IN PROGRESS",
