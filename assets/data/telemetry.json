@@ -1,6 +1,6 @@
 {
     "metadata": {
-        "export_timestamp": "2026-10-24T15:40:36.071456Z",
+        "export_timestamp": "2026-10-25T04:03:25.612114Z",
         "active_projects": 12
     },
     "telemetry": {
@@ -121,7 +121,7 @@
             "active_task": "No tasks planned",
             "tasks_completed": 0,
             "tasks_total": 0,
-            "last_updated": "10/24/2026",
+            "last_updated": "10/25/2026",
             "metric_label": "Compute",
             "metric_value": "0h"
         },
