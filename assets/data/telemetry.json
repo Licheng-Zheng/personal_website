@@ -1,7 +1,7 @@
 {
     "metadata": {
-        "export_timestamp": "2026-10-27T17:46:57.946059Z",
-        "active_projects": 11
+        "export_timestamp": "2026-10-28T04:58:11.259017Z",
+        "active_projects": 12
     },
     "telemetry": {
         "macropad": {
@@ -124,6 +124,17 @@
             "last_updated": "10/21/2026",
             "metric_label": "Compute",
             "metric_value": "10h"
+        },
+        "telescope": {
+            "status_badge": "IN PROGRESS",
+            "severity": "warning",
+            "current_phase": "Hardware Projects",
+            "active_task": "Task 1.1: Crayford Focuser CAD & Print",
+            "tasks_completed": 2,
+            "tasks_total": 14,
+            "last_updated": "10/27/2026",
+            "metric_label": "Compute",
+            "metric_value": "2h"
         }
     }
 }
