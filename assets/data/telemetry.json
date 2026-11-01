@@ -1,6 +1,6 @@
 {
     "metadata": {
-        "export_timestamp": "2026-10-31T17:04:41.144245Z",
+        "export_timestamp": "2026-11-01T05:23:33.654590Z",
         "active_projects": 12
     },
     "telemetry": {
@@ -86,22 +86,22 @@
             "severity": "warning",
             "current_phase": "Academic",
             "active_task": "Week 5: Pre-readings",
-            "tasks_completed": 23,
+            "tasks_completed": 24,
             "tasks_total": 48,
             "last_updated": "11/28/2026",
             "metric_label": "Compute",
-            "metric_value": "34.5h"
+            "metric_value": "38h"
         },
         "cscb36": {
             "status_badge": "IN PROGRESS",
             "severity": "warning",
             "current_phase": "Academic",
-            "active_task": "Week 4: Note making ",
-            "tasks_completed": 24,
+            "active_task": "Week 5: Pre-readings",
+            "tasks_completed": 31,
             "tasks_total": 61,
             "last_updated": "11/28/2026",
             "metric_label": "Compute",
-            "metric_value": "32h"
+            "metric_value": "45h"
         },
         "fader_deck": {
             "status_badge": "IN PROGRESS",
