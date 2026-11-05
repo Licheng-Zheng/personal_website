@@ -1,6 +1,6 @@
 {
     "metadata": {
-        "export_timestamp": "2026-11-04T19:35:53.251680Z",
+        "export_timestamp": "2026-11-05T05:58:39.204387Z",
         "active_projects": 12
     },
     "telemetry": {
@@ -49,23 +49,23 @@
             "metric_value": "1h"
         },
         "utat_stuff": {
-            "status_badge": "COMPLETED",
-            "severity": "success",
+            "status_badge": "IN PROGRESS",
+            "severity": "warning",
             "current_phase": "Software Projects",
-            "active_task": "Write out how we can use it ",
+            "active_task": "Review cloud cover and add to the research ",
             "tasks_completed": 6,
-            "tasks_total": 6,
+            "tasks_total": 9,
             "last_updated": "09/22/2026",
             "metric_label": "Compute",
             "metric_value": "6.5h"
         },
         "personal_website": {
-            "status_badge": "COMPLETED",
-            "severity": "success",
+            "status_badge": "IN PROGRESS",
+            "severity": "warning",
             "current_phase": "Software Projects",
-            "active_task": "Figure out additional things to add from the READMEs",
+            "active_task": "Add in the telescope and a hardware section",
             "tasks_completed": 9,
-            "tasks_total": 9,
+            "tasks_total": 10,
             "last_updated": "09/16/2026",
             "metric_label": "Compute",
             "metric_value": "15.5h"
@@ -74,34 +74,34 @@
             "status_badge": "IN PROGRESS",
             "severity": "warning",
             "current_phase": "Academic",
-            "active_task": "Week 5: Pre-readings",
-            "tasks_completed": 26,
+            "active_task": "Week 5: Good copy Notes",
+            "tasks_completed": 30,
             "tasks_total": 49,
             "last_updated": "11/27/2026",
             "metric_label": "Compute",
-            "metric_value": "38h"
+            "metric_value": "44.5h"
         },
         "stab52": {
             "status_badge": "IN PROGRESS",
             "severity": "warning",
             "current_phase": "Academic",
-            "active_task": "Week 5: Pre-readings",
-            "tasks_completed": 24,
+            "active_task": "Week 6: Good copy Notes",
+            "tasks_completed": 34,
             "tasks_total": 48,
-            "last_updated": "11/28/2026",
+            "last_updated": "11/21/2026",
             "metric_label": "Compute",
-            "metric_value": "38h"
+            "metric_value": "52h"
         },
         "cscb36": {
             "status_badge": "IN PROGRESS",
             "severity": "warning",
             "current_phase": "Academic",
-            "active_task": "Week 5: Pre-readings",
-            "tasks_completed": 31,
+            "active_task": "Week 5: Note making ",
+            "tasks_completed": 34,
             "tasks_total": 61,
             "last_updated": "11/28/2026",
             "metric_label": "Compute",
-            "metric_value": "45h"
+            "metric_value": "48h"
         },
         "fader_deck": {
             "status_badge": "IN PROGRESS",
