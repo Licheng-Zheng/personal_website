@@ -1,6 +1,6 @@
 {
     "metadata": {
-        "export_timestamp": "2026-11-20T19:49:59.267065Z",
+        "export_timestamp": "2026-11-21T06:29:48.034290Z",
         "active_projects": 12
     },
     "telemetry": {
@@ -74,34 +74,34 @@
             "status_badge": "IN PROGRESS",
             "severity": "warning",
             "current_phase": "Academic",
-            "active_task": "Week 6: Good copy Notes",
-            "tasks_completed": 36,
+            "active_task": "Week 7: Pre-readings",
+            "tasks_completed": 37,
             "tasks_total": 49,
             "last_updated": "11/27/2026",
             "metric_label": "Compute",
-            "metric_value": "53.5h"
+            "metric_value": "55h"
         },
         "stab52": {
             "status_badge": "IN PROGRESS",
             "severity": "warning",
             "current_phase": "Academic",
-            "active_task": "Week 7: Problem Set",
-            "tasks_completed": 41,
+            "active_task": "Week 8: Good copy Notes",
+            "tasks_completed": 46,
             "tasks_total": 48,
             "last_updated": "11/21/2026",
             "metric_label": "Compute",
-            "metric_value": "63h"
+            "metric_value": "71h"
         },
         "cscb36": {
             "status_badge": "IN PROGRESS",
             "severity": "warning",
             "current_phase": "Academic",
-            "active_task": "Week 6: Note making ",
-            "tasks_completed": 39,
+            "active_task": "Week 7: Review for Quiz",
+            "tasks_completed": 50,
             "tasks_total": 61,
             "last_updated": "11/28/2026",
             "metric_label": "Compute",
-            "metric_value": "54h"
+            "metric_value": "71.5h"
         },
         "fader_deck": {
             "status_badge": "IN PROGRESS",
